@@ -1,0 +1,401 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{7313A37E-23E0-441E-B9E4-7CDD59E8D9CD}</ProjectGuid>
+    <OutputType>Exe</OutputType>
+    <RootNamespace>LaboratoryOnlineJournal</RootNamespace>
+    <AssemblyName>LaboratoryOnlineJournal</AssemblyName>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <Deterministic>true</Deterministic>
+    <TargetFrameworkProfile />
+    <IsWebBootstrapper>false</IsWebBootstrapper>
+    <PublishUrl>publish\</PublishUrl>
+    <Install>true</Install>
+    <InstallFrom>Disk</InstallFrom>
+    <UpdateEnabled>false</UpdateEnabled>
+    <UpdateMode>Foreground</UpdateMode>
+    <UpdateInterval>7</UpdateInterval>
+    <UpdateIntervalUnits>Days</UpdateIntervalUnits>
+    <UpdatePeriodically>false</UpdatePeriodically>
+    <UpdateRequired>false</UpdateRequired>
+    <MapFileExtensions>true</MapFileExtensions>
+    <ApplicationRevision>0</ApplicationRevision>
+    <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
+    <UseApplicationTrust>false</UseApplicationTrust>
+    <BootstrapperEnabled>true</BootstrapperEnabled>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <Prefer32Bit>false</Prefer32Bit>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <Prefer32Bit>false</Prefer32Bit>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="AutoTable, Version=1.6.7153.19874, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>lib\AutoTable.dll</HintPath>
+    </Reference>
+    <Reference Include="ICSharpCode.SharpZipLib, Version=0.86.0.518, Culture=neutral, PublicKeyToken=1b03e6acf1164f73, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>lib\ICSharpCode.SharpZipLib.dll</HintPath>
+    </Reference>
+    <Reference Include="ImapX_cp, Version=2.0.0.18, Culture=neutral, PublicKeyToken=5992873d65130d1f, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>lib\ImapX_cp.dll</HintPath>
+    </Reference>
+    <Reference Include="MySql.Data, Version=6.9.8.0, Culture=neutral, PublicKeyToken=c5687fc88969c44d, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>lib\MySql.Data.dll</HintPath>
+    </Reference>
+    <Reference Include="NPOI, Version=2.1.3.1, Culture=neutral, PublicKeyToken=0df73ec7942b34e1, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>lib\NPOI.dll</HintPath>
+    </Reference>
+    <Reference Include="NPOI.OOXML, Version=2.1.3.1, Culture=neutral, PublicKeyToken=0df73ec7942b34e1, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>lib\NPOI.OOXML.dll</HintPath>
+    </Reference>
+    <Reference Include="NPOI.OpenXml4Net, Version=2.1.3.1, Culture=neutral, PublicKeyToken=0df73ec7942b34e1, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>lib\NPOI.OpenXml4Net.dll</HintPath>
+    </Reference>
+    <Reference Include="NPOI.OpenXmlFormats, Version=2.1.3.1, Culture=neutral, PublicKeyToken=0df73ec7942b34e1, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>lib\NPOI.OpenXmlFormats.dll</HintPath>
+    </Reference>
+    <Reference Include="PresentationFramework" />
+    <Reference Include="SevenZipSharp, Version=0.64.3890.29348, Culture=neutral, PublicKeyToken=20de82c62b055c88, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>lib\SevenZipSharp.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Security" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="AddIn.cs" />
+    <Compile Include="admin\AboutForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="admin\AboutForm.designer.cs">
+      <DependentUpon>AboutForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="admin\AdminPanel.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="admin\AdminPanel.Designer.cs">
+      <DependentUpon>AdminPanel.cs</DependentUpon>
+    </Compile>
+    <Compile Include="admin\Settings_Form.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="admin\Settings_Form.designer.cs">
+      <DependentUpon>Settings_Form.cs</DependentUpon>
+    </Compile>
+    <Compile Include="admin\UsersBlock_Form.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="admin\UsersBlock_Form.Designer.cs">
+      <DependentUpon>UsersBlock_Form.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Employe\ChangePeriod_Form.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Employe\ChangePeriod_Form.designer.cs">
+      <DependentUpon>ChangePeriod_Form.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Employe\Employe_Form.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Employe\Employe_Form.Designer.cs">
+      <DependentUpon>Employe_Form.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Employe\LoadDBUpdates_Form.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Employe\LoadDBUpdates_Form.Designer.cs">
+      <DependentUpon>LoadDBUpdates_Form.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\MassOutgo\MassOutGo.cs" />
+    <Compile Include="Forms\MassOutgo\MassOutgoOtch.cs" />
+    <Compile Include="Forms\MassOutgo\MassOutgo_Form.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\MassOutgo\MassOutgo_Form.Designer.cs">
+      <DependentUpon>MassOutgo_Form.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\MiddleMarks\MiddleMarks.cs" />
+    <Compile Include="Forms\MiddleMarks\MiddleMarksOtch.cs" />
+    <Compile Include="Forms\MiddleMarks\MiddleMarks_Form.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\MiddleMarks\MiddleMarks_Form.Designer.cs">
+      <DependentUpon>MiddleMarks_Form.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\Protokol\Form\AquaAurat_KOCA.cs" />
+    <Compile Include="Forms\Protokol\Form\BaseProtokol.cs" />
+    <Compile Include="Forms\Protokol\Form\OSV.cs" />
+    <Compile Include="Forms\Protokol\Form\Protokol1.cs" />
+    <Compile Include="Forms\Protokol\Form\Protokol2.cs" />
+    <Compile Include="Forms\Protokol\Form\Protokol3.cs" />
+    <Compile Include="Forms\Protokol\Form\Protokol4.cs" />
+    <Compile Include="Forms\Protokol\Protocol_class.cs" />
+    <Compile Include="Forms\Protokol\Protokol_Form.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\Protokol\Protokol_Form.Designer.cs">
+      <DependentUpon>Protokol_Form.cs</DependentUpon>
+    </Compile>
+    <Compile Include="List\MarksCompanyEdit_Form.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="List\MarksCompanyEdit_Form.Designer.cs">
+      <DependentUpon>MarksCompanyEdit_Form.cs</DependentUpon>
+    </Compile>
+    <Compile Include="List\MErrorEdit_Form.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="List\MErrorEdit_Form.Designer.cs">
+      <DependentUpon>MErrorEdit_Form.cs</DependentUpon>
+    </Compile>
+    <Compile Include="List\MErrorList_Form.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="List\MErrorList_Form.Designer.cs">
+      <DependentUpon>MErrorList_Form.cs</DependentUpon>
+    </Compile>
+    <Compile Include="List\PSGMethods_Form.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="List\PSGMethods_Form.Designer.cs">
+      <DependentUpon>PSGMethods_Form.cs</DependentUpon>
+    </Compile>
+    <Compile Include="List\SetText_Form.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="List\SetText_Form.Designer.cs">
+      <DependentUpon>SetText_Form.cs</DependentUpon>
+    </Compile>
+    <Compile Include="List\Volume\VolumeEdit_Form.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="List\Volume\VolumeEdit_Form.Designer.cs">
+      <DependentUpon>VolumeEdit_Form.cs</DependentUpon>
+    </Compile>
+    <Compile Include="List\Volume\Volume_class.cs" />
+    <Compile Include="misc\DB_Form.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="misc\DB_Form.Designer.cs">
+      <DependentUpon>DB_Form.cs</DependentUpon>
+    </Compile>
+    <Compile Include="misc\Increment_Form.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="misc\Increment_Form.Designer.cs">
+      <DependentUpon>Increment_Form.cs</DependentUpon>
+    </Compile>
+    <Compile Include="misc\Loads\Base.cs" />
+    <Compile Include="misc\Loads\Main.cs" />
+    <Compile Include="misc\Loads\Settings.cs" />
+    <Compile Include="misc\Misc.cs" />
+    <Compile Include="misc\SynchPool.cs" />
+    <Compile Include="misc\Tables_Form.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="misc\Tables_Form.Designer.cs">
+      <DependentUpon>Tables_Form.cs</DependentUpon>
+    </Compile>
+    <Compile Include="misc\Table_Form.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="misc\Table_Form.Designer.cs">
+      <DependentUpon>Table_Form.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Program.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
+    <Compile Include="Startup\Mail_Form.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Startup\Mail_Form.Designer.cs">
+      <DependentUpon>Mail_Form.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Startup\SetNewPassWord_Form.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Startup\SetNewPassWord_Form.Designer.cs">
+      <DependentUpon>SetNewPassWord_Form.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Startup\StartupLogo_Form.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Startup\StartupLogo_Form.Designer.cs">
+      <DependentUpon>StartupLogo_Form.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Startup\Startup_Form.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Startup\Startup_Form.designer.cs">
+      <DependentUpon>Startup_Form.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Startup\TimeLessPass_Form.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Startup\TimeLessPass_Form.Designer.cs">
+      <DependentUpon>TimeLessPass_Form.cs</DependentUpon>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="admin\AboutForm.resx">
+      <DependentUpon>AboutForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="admin\AdminPanel.resx">
+      <DependentUpon>AdminPanel.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="admin\Settings_Form.resx">
+      <DependentUpon>Settings_Form.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="admin\UsersBlock_Form.resx">
+      <DependentUpon>UsersBlock_Form.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Employe\ChangePeriod_Form.resx">
+      <DependentUpon>ChangePeriod_Form.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Employe\Employe_Form.resx">
+      <DependentUpon>Employe_Form.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Employe\LoadDBUpdates_Form.resx">
+      <DependentUpon>LoadDBUpdates_Form.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\MassOutgo\MassOutgo_Form.resx">
+      <DependentUpon>MassOutgo_Form.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\MiddleMarks\MiddleMarks_Form.resx">
+      <DependentUpon>MiddleMarks_Form.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\Protokol\Protokol_Form.resx">
+      <DependentUpon>Protokol_Form.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="List\MarksCompanyEdit_Form.resx">
+      <DependentUpon>MarksCompanyEdit_Form.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="List\MErrorEdit_Form.resx">
+      <DependentUpon>MErrorEdit_Form.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="List\MErrorList_Form.resx">
+      <DependentUpon>MErrorList_Form.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="List\PSGMethods_Form.resx">
+      <DependentUpon>PSGMethods_Form.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="List\SetText_Form.resx">
+      <DependentUpon>SetText_Form.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="List\Volume\VolumeEdit_Form.resx">
+      <DependentUpon>VolumeEdit_Form.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="misc\DB_Form.resx">
+      <DependentUpon>DB_Form.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="misc\Increment_Form.resx">
+      <DependentUpon>Increment_Form.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="misc\Tables_Form.resx">
+      <DependentUpon>Tables_Form.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="misc\Table_Form.resx">
+      <DependentUpon>Table_Form.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <SubType>Designer</SubType>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Startup\Mail_Form.resx">
+      <DependentUpon>Mail_Form.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Startup\SetNewPassWord_Form.resx">
+      <DependentUpon>SetNewPassWord_Form.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Startup\StartupLogo_Form.resx">
+      <DependentUpon>StartupLogo_Form.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Startup\TimeLessPass_Form.resx">
+      <DependentUpon>TimeLessPass_Form.cs</DependentUpon>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="lib\7z32.dll" />
+    <Content Include="lib\7z32_cp.dll" />
+    <Content Include="lib\7z64.dll" />
+    <Content Include="lib\7z64_cp.dll" />
+    <Content Include="lib\AutoTable.dll" />
+    <Content Include="lib\ICSharpCode.SharpZipLib.dll" />
+    <Content Include="lib\ImapX.dll" />
+    <Content Include="lib\ImapX_cp.dll" />
+    <Content Include="lib\MySql.Data.dll" />
+    <Content Include="lib\NPOI.dll" />
+    <Content Include="lib\NPOI.OOXML.dll" />
+    <Content Include="lib\NPOI.OpenXml4Net.dll" />
+    <Content Include="lib\NPOI.OpenXmlFormats.dll" />
+    <Content Include="lib\SevenZipSharp.dll" />
+    <None Include="Resources\logotip01_mini1.jpg" />
+    <None Include="Resources\logotip01_mini.jpg" />
+    <None Include="Resources\delete1.png" />
+    <None Include="Resources\delete.png" />
+    <None Include="Resources\date_previous.png" />
+    <None Include="Resources\date_next_red.png" />
+    <None Include="Resources\date_next.png" />
+    <None Include="Resources\date_home.png" />
+    <None Include="Resources\arrow_up.png" />
+    <None Include="Resources\arrow_down.png" />
+    <None Include="Resources\add1.png" />
+    <None Include="Resources\add.png" />
+    <None Include="Resources\accept1.png" />
+    <None Include="Resources\accept.png" />
+    <None Include="Resources\page_white_copy.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="app.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <BootstrapperPackage Include="Microsoft.Net.Framework.3.5.SP1">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 3.5 SP1</ProductName>
+      <Install>false</Install>
+    </BootstrapperPackage>
+  </ItemGroup>
+  <ItemGroup />
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+</Project>
