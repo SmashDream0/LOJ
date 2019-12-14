@@ -39,7 +39,8 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="AutoTable">
+    <Reference Include="AutoTable, Version=1.6.7287.43075, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
       <HintPath>..\LaboratoryOnlineJournal\lib\AutoTable.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.VisualStudio.TestPlatform.TestFramework, Version=14.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
@@ -57,17 +58,151 @@
     <Reference Include="System.Windows.Forms" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CSVSerializeProviderTest.cs" />
+    <Compile Include="EncodingTest.cs" />
+    <Compile Include="FormatCheckerTest.cs" />
+    <Compile Include="OldSerializeProviderTest.cs" />
+    <Compile Include="TestData1.cs" />
     <Compile Include="UnitTest1.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\LaboratoryOnlineJournal\LaboratoryOnlineJournal.csproj">
       <Project>{7313a37e-23e0-441e-b9e4-7cdd59e8d9cd}</Project>
       <Name>LaboratoryOnlineJournal</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="loj\Area.MFT">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="loj\BackGrd.MFT">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="loj\EdType.MFT">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="loj\Mark.MFT">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="loj\MError.MFT">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="loj\Method.MFT">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="loj\MVolume.MFT">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="loj\Norm.MFT">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="loj\Object.MFT">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="loj\OLocation.MFT">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="loj\OPType.MFT">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="loj\OType.MFT">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="loj\PaPoS.MFT">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="loj\People.MFT">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="loj\PMNorm.MFT">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="loj\Podr.MFT">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="loj\PodrPpl.MFT">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="loj\Prfssn.MFT">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="loj\Prt.MFT">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="loj\PrtS.MFT">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="loj\PSGM.MFT">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="loj\PType.MFT">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="loj\Resp.MFT">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="loj\Sample.MFT">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="loj\SCause.MFT">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="loj\SM.MFT">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="loj\SMS.MFT">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="loj\SPoint.MFT">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="loj\SPool.MFT">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="loj\TCS.MFT">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="loj\TestCond.MFT">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="loj\User.MFT">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="loj\UTable.MFT">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="xls\Area.xls" />
+    <None Include="xls\BackGrd.xls" />
+    <None Include="xls\EdType.xls" />
+    <None Include="xls\Mark.xls" />
+    <None Include="xls\MError.xls" />
+    <None Include="xls\Method.xls" />
+    <None Include="xls\MVolume.xls" />
+    <None Include="xls\Norm.xls" />
+    <None Include="xls\Object.xls" />
+    <None Include="xls\OLocation.xls" />
+    <None Include="xls\OPType.xls" />
+    <None Include="xls\OType.xls" />
+    <None Include="xls\PaPoS.xls" />
+    <None Include="xls\People.xls" />
+    <None Include="xls\PMNorm.xls" />
+    <None Include="xls\Podr.xls" />
+    <None Include="xls\PodrPpl.xls" />
+    <None Include="xls\Prfssn.xls" />
+    <None Include="xls\Prt.xls" />
+    <None Include="xls\PrtS.xls" />
+    <None Include="xls\PSGM.xls" />
+    <None Include="xls\PType.xls" />
+    <None Include="xls\Resp.xls" />
+    <None Include="xls\Sample.xls" />
+    <None Include="xls\SCause.xls" />
+    <None Include="xls\SM.xls" />
+    <None Include="xls\SMS.xls" />
+    <None Include="xls\SPoint.xls" />
+    <None Include="xls\SPool.xls" />
+    <None Include="xls\User.xls" />
+    <None Include="xls\UTable.xls" />
   </ItemGroup>
   <Import Project="$(VSToolsPath)\TeamTest\Microsoft.TestTools.targets" Condition="Exists('$(VSToolsPath)\TeamTest\Microsoft.TestTools.targets')" />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

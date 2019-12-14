@@ -11,22 +11,79 @@ using System.Threading;
 using System.Reflection;
 using System.IO;
 using LaboratoryOnlineJournal;
+using LaboratoryOnlineJournal.Synch;
+using LaboratoryOnlineJournal.Serializer;
 
 namespace LOJ_test
 {
     [TestClass]
     public class UnitTest
     {
+        private static DataBase DataBase;
+
+        [ClassInitialize]
+        public static void Initialize(TestContext testContext)
+        {
+            Misc.CheckTablesExist = false;
+
+            DataBase = new DataBase("loj", Encoding.GetEncoding(866));
+
+            DataBase.UseMFT(".");
+
+            Misc.DataBaseLoadFT(DataBase, null);
+            data.SynchPool = null;
+            Misc.DataBaseLoad(DataBase, null);
+
+            var tables = new List<DataBase.ISTable>();
+
+            var uTable = DataBase.Tables.First(x => x.Name == "UTable").CreateSubTable(false);
+
+            uTable.QUERRY().SHOW.DO();
+
+            foreach (var table in DataBase.Tables)
+            {
+                if (IsInUTable(uTable, table.Name))
+                {
+                    var sTable = table.CreateSubTable(false);
+
+                    new SynchTable(sTable);
+                }
+            }
+
+            DataBase.UseLocal();
+        }
+
+        [ClassCleanup]
+        public static void Clean()
+        {
+            T.Clear();
+            G.Clear();
+
+            DataBase = null;
+        }
+
+        private static bool IsInUTable(DataBase.ISTable uTable, string tableName)
+        {
+            bool result = false;
+
+            for (int i = 0; i < uTable.Rows.Count; i++)
+            {
+                var uTableName = uTable.Rows.Get<String>(i, C.UTable.Name);
+
+                if (String.Equals(uTableName, tableName, StringComparison.InvariantCultureIgnoreCase))
+                {
+                    result = uTable.Rows.Get<bool>(i, C.UTable.Use);
+                    break;
+                }
+            }
+
+            return result;
+        }
+
         /// <summary>Класс SPoints_class</summary>
         [TestMethod]
         public void Base()
         {
-            //локальная бд
-            data.T1 = new DataBase("loj", Encoding.GetEncoding(866));   //кодировка - вынужденная мера, возможно что-нибудь придумаю
-
-            //данные
-            GetData();
-
             var YM = ATMisc.GetYMFromYearMonth(2016, 7);
 
             var SPoints = new Employe_Form.SPoints_class(YM);
@@ -138,27 +195,27 @@ namespace LOJ_test
         public void CoDeMessage()
         {
             //обустройство бд
-            data.T1 = new DataBase("CeDoTest");
+            var DataBase = new DataBase("CeDoTest");
 
             data.UserID = 1;
 
-            T.User = data.T1.Tables.Add("User", "User");
+            T.User = DataBase.Tables.Add("User", "User");
             T.User.Columns.AddString("Login", "Логин", 25);
 
             G.User = T.User.CreateSubTable();
             G.User.Rows.Add(new object[] { "test" });
 
-            T.SPool = data.T1.Tables.Add("SPool", "Пул синхронизаций");
+            T.SPool = DataBase.Tables.Add("SPool", "Пул синхронизаций");
             T.SPool.Columns.AddRelation(T.User.GetColumn(C.User.Login), "A", T.User.AlterName + " автор");
             T.SPool.Columns.AddRelation(T.User.GetColumn(C.User.Login), "S", T.User.AlterName + " отправитель");
             T.SPool.Columns.AddBool("local", "создано локально");
             T.SPool.Columns.AddDATE("StartDate", "Дата создания");
             T.SPool.AutoSave(false, DataBase.TypeOfTable.Remote);
 
-            var Table1 = data.T1.Tables.Add("tb1", "tb1");
+            var Table1 = DataBase.Tables.Add("tb1", "tb1");
             Table1.Columns.AddString("str", "str", 5);
 
-            var Table2 = data.T1.Tables.Add("tb2", "tb2");
+            var Table2 = DataBase.Tables.Add("tb2", "tb2");
             Table2.Columns.AddAutoUpdate("au", "au");
             Table2.Columns.AddBool("bl", "bl");
             Table2.Columns.AddByte("bt", "bt");
@@ -170,7 +227,7 @@ namespace LOJ_test
             Table2.Columns.AddString("str", "str", 150);
             Table2.Columns.AddRelation(Table1.GetColumn(0));
 
-            T.UTable = data.T1.Tables.Add("UTable", "UTable");
+            T.UTable = DataBase.Tables.Add("UTable", "UTable");
             T.UTable.Columns.AddString("Name", "Наименование", 15);
             T.UTable.Columns.AddBool("Add", "Добавление", DataBase.ColLocation.Local, true, true);
             T.UTable.Columns.AddBool("Update", "Изменение", DataBase.ColLocation.Local, true, true);
@@ -178,7 +235,8 @@ namespace LOJ_test
             T.UTable.Columns.AddBool("Use", "Задействовать", DataBase.ColLocation.Local, true, true);
 
             //данные
-            var synch = new SynchPool_class();
+            var serializeProviders = Misc.GetSerializeProviders(DataBase);
+            var synch = new SynchPool_class(DataBase, serializeProviders.First().Name, serializeProviders);
 
             synch.AddKey(1, "<RSAKeyValue><Modulus>vSHFY3X54bKGI0lc8djFZhqOH/a86oORTH6ulnUBnvSlpj65CtOPTLpwOkmfnSlLu64qyazFMg7IrFuW3fkiSsiiTCVZInIh50De+V/dadYwjc96KDDb9qn9wb3JMikSBCWNQwqTyEgT1vCrUuHebhx8rjc6laGkRpFnzzrUJbtktYcDqYYU/xYUUmYb19HhtQV0GrQtudZ54oEHeGz+tZtopyqyVPm0ZEHUh3xf6THRWg9Jd1hnBAhyjlCgaTIwA9D25D7hJA74fArVolIRIPG0JMV+plBC9sfNRmGfPoT082l3AKIVWbO6/hb+3vxN1c+SoJpc9JD90JysC/Vkkw==</Modulus><Exponent>AQAB</Exponent><P>5Og3JEWla4H35QOq6Djt8eh1lpGVLZmEYTmrKIZoLXqOJR6NvMMlwpjDmnvZynLd8qIhGZBn7rsXBGHxNvfzwCxXcxzCmD2iDL/XK8NoA/tlZ4r70UvFyVZDjsr6XNL0gYegkTLklobW1ZFD0Typh9qboNYWydlACUzZWKvmnVM=</P><Q>04RipKn84c1yt0XfaKbe2Eg4bjx+g8ilv6vPaw5XlQlo27WCtHsD7MIrbzPLe5Be78ixdcEoKFIPucH2huSjtxxH/Y8oJ1b0VYgdk8445SKTCG6WcwJPYxmVY8Twz7hTDLoZzTSnPvSynM6PsBktuC+zPqrVU068gehPkRnR88E=</Q><DP>HFDpeVAwPVNPggHpI17feFxEJ4MMzB5AdPJ4TMQLoQyXBtp3uBD/28mf8L0/XL7G29vYclwdrzdving/KYiUm4IgszmsjL6bDC6zBFPgyxVPHvbfXa2c4uIL618Kh28FFfzcDPoZstEtRC/7DqgNZKPTOpshKIj6VewuurxRA8c=</DP><DQ>pd8RhFQSDfmRVowi8Oy7oRyxtDEYfbwhzzerBydOI4AnjPTAtUwq/cYfTatujU3gRWY7VD7PgR8pWeDztUEj6frxsbRMJt2X6mM93qVAFOCSMXCX50UOgIaVkpHkzuCbsEVY6oW6CjLWxwVtxQlZwzEU/bX2aMg8KBvIGeAHt4E=</DQ><InverseQ>sAnYc66Ze4RmwOdjqMUs2Z0NeALuI7b15ZroZ/m5qqOoaasNKsKphX3PM9GLWdw9NQd4r6AnCTWCz+2CdEftX6f7psFwrIVEJM7LjLJtSNzKVMhlz4edlxmRoM43rXxuVax++KWYrBPG0jw5zbH6e9NE+K6j125MpFnYZLvpssI=</InverseQ><D>X3zta4nk306C6s3fXztSbnp5xymLt9s1QKm0+8GXT+m0uHpyckTd1J9MiiEhtPdkhR0p/Sh9ZwiPyHV1dhySc69YQZmZpwp4k4jtCnqcDxNU8EQQKLqCU8b/lxF6wxh5QB61c2OjuTqqyZo45V+kLXO0f0DjEyjJB9fh0X6iHWng0fDz9WZLKyYnNFHD5/SqKub6CnX8UUdypkzbtdeAzI902+AlfJ8J6+sg/lhbev5uo9rFIM5BkSPjMtZBizuSiPA4E7hmOUlojGOaQFMxIE85W5ZBnso2VWnCgtzKjDQz5QHCKYhSNpiikUUB3HwYuuX/ib8v9tn8AwAu1cdgAQ==</D></RSAKeyValue>", "<RSAKeyValue><Modulus>vSHFY3X54bKGI0lc8djFZhqOH/a86oORTH6ulnUBnvSlpj65CtOPTLpwOkmfnSlLu64qyazFMg7IrFuW3fkiSsiiTCVZInIh50De+V/dadYwjc96KDDb9qn9wb3JMikSBCWNQwqTyEgT1vCrUuHebhx8rjc6laGkRpFnzzrUJbtktYcDqYYU/xYUUmYb19HhtQV0GrQtudZ54oEHeGz+tZtopyqyVPm0ZEHUh3xf6THRWg9Jd1hnBAhyjlCgaTIwA9D25D7hJA74fArVolIRIPG0JMV+plBC9sfNRmGfPoT082l3AKIVWbO6/hb+3vxN1c+SoJpc9JD90JysC/Vkkw==</Modulus><Exponent>AQAB</Exponent><P>5Og3JEWla4H35QOq6Djt8eh1lpGVLZmEYTmrKIZoLXqOJR6NvMMlwpjDmnvZynLd8qIhGZBn7rsXBGHxNvfzwCxXcxzCmD2iDL/XK8NoA/tlZ4r70UvFyVZDjsr6XNL0gYegkTLklobW1ZFD0Typh9qboNYWydlACUzZWKvmnVM=</P><Q>04RipKn84c1yt0XfaKbe2Eg4bjx+g8ilv6vPaw5XlQlo27WCtHsD7MIrbzPLe5Be78ixdcEoKFIPucH2huSjtxxH/Y8oJ1b0VYgdk8445SKTCG6WcwJPYxmVY8Twz7hTDLoZzTSnPvSynM6PsBktuC+zPqrVU068gehPkRnR88E=</Q><DP>HFDpeVAwPVNPggHpI17feFxEJ4MMzB5AdPJ4TMQLoQyXBtp3uBD/28mf8L0/XL7G29vYclwdrzdving/KYiUm4IgszmsjL6bDC6zBFPgyxVPHvbfXa2c4uIL618Kh28FFfzcDPoZstEtRC/7DqgNZKPTOpshKIj6VewuurxRA8c=</DP><DQ>pd8RhFQSDfmRVowi8Oy7oRyxtDEYfbwhzzerBydOI4AnjPTAtUwq/cYfTatujU3gRWY7VD7PgR8pWeDztUEj6frxsbRMJt2X6mM93qVAFOCSMXCX50UOgIaVkpHkzuCbsEVY6oW6CjLWxwVtxQlZwzEU/bX2aMg8KBvIGeAHt4E=</DQ><InverseQ>sAnYc66Ze4RmwOdjqMUs2Z0NeALuI7b15ZroZ/m5qqOoaasNKsKphX3PM9GLWdw9NQd4r6AnCTWCz+2CdEftX6f7psFwrIVEJM7LjLJtSNzKVMhlz4edlxmRoM43rXxuVax++KWYrBPG0jw5zbH6e9NE+K6j125MpFnYZLvpssI=</InverseQ><D>X3zta4nk306C6s3fXztSbnp5xymLt9s1QKm0+8GXT+m0uHpyckTd1J9MiiEhtPdkhR0p/Sh9ZwiPyHV1dhySc69YQZmZpwp4k4jtCnqcDxNU8EQQKLqCU8b/lxF6wxh5QB61c2OjuTqqyZo45V+kLXO0f0DjEyjJB9fh0X6iHWng0fDz9WZLKyYnNFHD5/SqKub6CnX8UUdypkzbtdeAzI902+AlfJ8J6+sg/lhbev5uo9rFIM5BkSPjMtZBizuSiPA4E7hmOUlojGOaQFMxIE85W5ZBnso2VWnCgtzKjDQz5QHCKYhSNpiikUUB3HwYuuX/ib8v9tn8AwAu1cdgAQ==</D></RSAKeyValue>");
 
@@ -224,12 +282,15 @@ namespace LOJ_test
 
             var cmsg = synch.GetEncrypted();
 
-            SynchPool_class.Table_class[] dmsg;
+            DeserializeResult dmsg;
             uint UID;
             DateTime DT;
             bool SPoolExisted;
 
-            var msg = synch.GetValues(0, cmsg, out dmsg, out UID, out DT, out SPoolExisted);
+            var msg = synch.GetValues(0, cmsg, out dmsg, out SPoolExisted);
+
+            UID = dmsg.UserID;
+            DT = dmsg.SynchDate;
 
             if (msg != null)
             { Exception(msg); }
@@ -237,16 +298,16 @@ namespace LOJ_test
             if (dmsg == null)
             { Exception("Декодированное сообщение пустое"); }
 
-            if (dmsg.Length != 1)
+            if (dmsg.Tables.Length != 1)
             { Exception("Не верное количество таблиц в декодированном сообщении"); }
 
-            if (dmsg[0].Table.Parent != Table2)
+            if (dmsg.Tables[0].STable.Parent != Table2)
             { Exception("Не вертая таблица декодированного сообщения"); }
 
-            if (dmsg[0].Rows.Length != t2.Rows.Count)
+            if (dmsg.Tables[0].Rows.Length != t2.Rows.Count)
             { Exception("Не верное количество строк в декодированном сообщении"); }
 
-            for (int i = 0; i < dmsg[0].Rows.Length; i++)
+            for (int i = 0; i < dmsg.Tables[0].Rows.Length; i++)
             {
                 int ColumnCount = -1;
 
@@ -266,69 +327,49 @@ namespace LOJ_test
                     {
                         ColumnCount++;
 
+                        object tableValue;
+                        object resultValue = dmsg.Tables[0].Rows[i].Values[ColumnCount];
+
                         switch (Cl.TypeCol)
                         {
                             case DataBase.Types.AutoStatus:
-                                if (t2.Rows.Get_UnShow<DataBase.AutoStatus>(i, ColumnCount) == (DataBase.AutoStatus)dmsg[0].Rows[i].Values[ColumnCount]) //шифруется в тип bool
-                                { continue; }
-                                else
-                                { break; }
-                            case DataBase.Types.Bool:
-                                if (t2.Rows.Get_UnShow<bool>(i, ColumnCount) == (bool)dmsg[0].Rows[i].Values[ColumnCount])
-                                { continue; }
-                                else
-                                { break; }
-                            case DataBase.Types.Byte:
-                                if (t2.Rows.Get_UnShow<byte>(i, ColumnCount) == (byte)dmsg[0].Rows[i].Values[ColumnCount])
-                                { continue; }
-                                else
-                                { break; }
-                            case DataBase.Types.DateTime:
-                                if (t2.Rows.Get_UnShow<DateTime>(i, ColumnCount) == (DateTime)dmsg[0].Rows[i].Values[ColumnCount])
-                                { continue; }
-                                else
-                                { break; }
-                            case DataBase.Types.Decimal:
-                                if (t2.Rows.Get_UnShow<decimal>(i, ColumnCount) == (decimal)dmsg[0].Rows[i].Values[ColumnCount])
-                                { continue; }
-                                else
-                                { break; }
-                            case DataBase.Types.Double:
-                                if (t2.Rows.Get_UnShow<double>(i, ColumnCount) == (double)dmsg[0].Rows[i].Values[ColumnCount])
-                                { continue; }
-                                else
-                                { break; }
-                            case DataBase.Types.Int32:
-                                if (t2.Rows.Get_UnShow<int>(i, ColumnCount) == (int)dmsg[0].Rows[i].Values[ColumnCount])
-                                { continue; }
-                                else
-                                { break; }
-                            case DataBase.Types.Int64:
-                                if (t2.Rows.Get_UnShow<long>(i, ColumnCount) == (long)dmsg[0].Rows[i].Values[ColumnCount])
-                                { continue; }
-                                else
-                                { break; }
-                            case DataBase.Types.RIU32:
-                                if (t2.Rows.Get_UnShow<RIU32>(i, ColumnCount) == (RIU32)dmsg[0].Rows[i].Values[ColumnCount]) //реляционная связь шифруется в uint
-                                { continue; }
-                                else
-                                { break; }
-                            case DataBase.Types.String:
-                                if (t2.Rows.Get_UnShow<string>(i, ColumnCount) == (string)dmsg[0].Rows[i].Values[ColumnCount])
-                                { continue; }
-                                else
-                                { break; }
-                            case DataBase.Types.UInt32:
-                                if (t2.Rows.Get_UnShow<uint>(i, ColumnCount) == (uint)dmsg[0].Rows[i].Values[ColumnCount])
-                                { continue; }
-                                else
-                                { break; }
-                            default:
-                                Exception("Неизвестный тип колонки");
+                                tableValue = t2.Rows.Get_UnShow<DataBase.AutoStatus>(i, ColumnCount);
                                 break;
+                            case DataBase.Types.Bool:
+                                tableValue = t2.Rows.Get_UnShow<bool>(i, ColumnCount);
+                                break;
+                            case DataBase.Types.Byte:
+                                tableValue = t2.Rows.Get_UnShow<byte>(i, ColumnCount);
+                                break;
+                            case DataBase.Types.DateTime:
+                                tableValue = t2.Rows.Get_UnShow<DateTime>(i, ColumnCount);
+                                break;
+                            case DataBase.Types.Decimal:
+                                tableValue = t2.Rows.Get_UnShow<Decimal>(i, ColumnCount);
+                                break;
+                            case DataBase.Types.Double:
+                                tableValue = t2.Rows.Get_UnShow<Double>(i, ColumnCount);
+                                break;
+                            case DataBase.Types.Int32:
+                                tableValue = t2.Rows.Get_UnShow<Int32>(i, ColumnCount);
+                                break;
+                            case DataBase.Types.Int64:
+                                tableValue = t2.Rows.Get_UnShow<Int64>(i, ColumnCount);
+                                break;
+                            case DataBase.Types.RIU32:
+                                tableValue = t2.Rows.Get_UnShow<RIU32>(i, ColumnCount);
+                                break;
+                            case DataBase.Types.String:
+                                tableValue = t2.Rows.Get_UnShow<String>(i, ColumnCount);
+                                break;
+                            case DataBase.Types.UInt32:
+                                tableValue = t2.Rows.Get_UnShow<UInt32>(i, ColumnCount);
+                                break;
+                            default:
+                                throw new Exception("Неизвестный тип колонки");
                         }
 
-                        Exception("Не верное значение колонки " + Cl.Name);
+                        Assert.AreEqual(tableValue, resultValue);
                     }
                 }
             }
@@ -384,16 +425,5 @@ namespace LOJ_test
 
         void Exception(string text)
         { throw new Exception(text); }
-
-        /// <summary>Заполняю таблицы</summary>
-        static void GetData()
-        {
-            data.T1.UseMFT("D:\\Asup_4\\ownCloud\\LaboratoryOnlineJournal\\LaboratoryOnlineJournal\\bin\\Debug\\тест\\");
-
-            Misc.DataBaseLoadFT(null);
-            Misc.DataBaseLoad(null);
-
-            data.T1.UseLocal();
-        }
     }
 }
