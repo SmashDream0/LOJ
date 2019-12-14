@@ -13,17 +13,19 @@ using NPOI.HSSF.UserModel;
 //using NPOI.HPSF;
 using NPOI.POIFS.FileSystem;
 using NPOI.SS.Util;
+using LaboratoryOnlineJournal.Serializer;
+using LaboratoryOnlineJournal.SerializeFormatProvider;
 
 namespace LaboratoryOnlineJournal
 {
     public static partial class Misc
     {
-        public static void DataBaseLoadFT(StartupLogo_Form.Loading_class Loading)
+        public static void DataBaseLoadFT(DataBase db, StartupLogo_Form.Loading_class Loading)
         {
             if (Loading != null)
             { Loading.LoadingComment = "Виртуальные таблицы"; }
             {
-                T.UType = data.T1.Tables.Add(Encoding.GetEncoding(1251), "UType", "Тип учетной записи");
+                T.UType = db.Tables.Add(Encoding.GetEncoding(1251), "UType", "Тип учетной записи");
                 T.UType.Columns.AddString("Name", "Наименование", 15);
 
                 G.UType = T.UType.CreateSubTable();
@@ -33,7 +35,7 @@ namespace LaboratoryOnlineJournal
                 G.UType.Rows.Add(new object[] { "Центр" });
                 G.UType.Rows.Add(new object[] { "Объединение" });
 
-                T.VarType = data.T1.Tables.Add(Encoding.GetEncoding(1251), "VarType", "Тип значения");
+                T.VarType = db.Tables.Add(Encoding.GetEncoding(1251), "VarType", "Тип значения");
                 T.VarType.Columns.AddString("Name", "Наименование", 15);
 
                 G.VarType = T.VarType.CreateSubTable();
@@ -42,7 +44,7 @@ namespace LaboratoryOnlineJournal
                 G.VarType.Rows.Add(new object[] { "Целое" });
                 G.VarType.Rows.Add(new object[] { "Булево" });
 
-                T.TResp = data.T1.Tables.Add(Encoding.GetEncoding(1251), "TResp", "Тип ответственности");
+                T.TResp = db.Tables.Add(Encoding.GetEncoding(1251), "TResp", "Тип ответственности");
                 T.TResp.Columns.AddString("Name", "Наименование", 20);
 
                 G.TResp = T.TResp.CreateSubTable();
@@ -51,7 +53,7 @@ namespace LaboratoryOnlineJournal
                 G.TResp.Rows.Add(new object[] { "Лабор.анализы" });
                 G.TResp.Rows.Add(new object[] { "Пробоотбор" });
 
-                T.PnMean = data.T1.Tables.Add(Encoding.GetEncoding(1251), "PnMean", "Значение профессии");
+                T.PnMean = db.Tables.Add(Encoding.GetEncoding(1251), "PnMean", "Значение профессии");
                 T.PnMean.Columns.AddString("Name", "Наименование", 15);
                 G.PnMean = T.PnMean.CreateSubTable();
 
@@ -60,7 +62,7 @@ namespace LaboratoryOnlineJournal
                 G.PnMean.Rows.Add(new object[] { "Технолог сооружения" });
                 G.PnMean.Rows.Add(new object[] { "Сотрудник" });
 
-                T.SGroup = data.T1.Tables.Add(Encoding.GetEncoding(1251), "SGroup", "Тип протокола");
+                T.SGroup = db.Tables.Add(Encoding.GetEncoding(1251), "SGroup", "Тип протокола");
                 T.SGroup.Columns.AddString("Name", "Наименование", 30);
                 T.SGroup.Columns.AddString("ShrName", "Краткое наименование", 5);
                 G.SGroup = T.SGroup.CreateSubTable();
@@ -76,7 +78,7 @@ namespace LaboratoryOnlineJournal
                 G.SGroup.Rows.Add(13, new object[] { "Токсичность1.Очищеная вода", "Т" }); //13
                 G.SGroup.Rows.Add(4, new object[] { "Токсичность2", "Т" }); //4
 
-                T.PSG = data.T1.Tables.Add(Encoding.GetEncoding(1251), "PSG", "Группа складов"); //Sample point type
+                T.PSG = db.Tables.Add(Encoding.GetEncoding(1251), "PSG", "Группа складов"); //Sample point type
                 T.PSG.Columns.AddString("Name", "Наименование", 15);
                 G.PSG = T.PSG.CreateSubTable();
 
@@ -84,7 +86,7 @@ namespace LaboratoryOnlineJournal
                 G.PSG.Rows.Add(new object[] { "Водоснабжение" });
                 G.PSG.Rows.Add(new object[] { "Водоотведение" });
 
-                T.NType = data.T1.Tables.Add(Encoding.GetEncoding(1251), "NType", "Тип нормы"); //Sample point type
+                T.NType = db.Tables.Add(Encoding.GetEncoding(1251), "NType", "Тип нормы"); //Sample point type
                 T.NType.Columns.AddString("Name", "Наименование", 22);
                 G.NType = T.NType.CreateSubTable();
 
@@ -95,7 +97,7 @@ namespace LaboratoryOnlineJournal
                 G.NType.Rows.Add(new object[] { "Выпуск" });
             }
 
-            if (!AddRemote(Loading, "Podr", "Подразделение", ref T.Podr, ref G.Podr,
+            if (!AddRemote(db, Loading, "Podr", "Подразделение", ref T.Podr, ref G.Podr,
             newTable =>
             {
                 newTable.Columns.AddRelation(T.PSG, "Name");
@@ -120,7 +122,7 @@ namespace LaboratoryOnlineJournal
             G.Podr.Rows.SetAddForm(C.Podr.GetEdit);
             G.Podr.Rows.SetEditForm(C.Podr.GetEdit);
 
-            if (!AddRemote(Loading, "User", "Пользователь", ref T.User, ref G.User,
+            if (!AddRemote(db, Loading, "User", "Пользователь", ref T.User, ref G.User,
                 newTable =>
                 {
                     newTable.Columns.AddString("Login", "Логин", 25);
@@ -178,7 +180,7 @@ namespace LaboratoryOnlineJournal
             G.User.Add(C.User.Mail);
 
             //вынужденная мера, чтоб автотестами поддерживалось
-            T.UTable = data.T1.Tables.Add("UTable", "Выгружаемые таблицы");
+            T.UTable = db.Tables.Add("UTable", "Выгружаемые таблицы");
             T.UTable.Columns.AddString("Name", "Наименование", 15);
             T.UTable.Columns.AddBool("Add", "Добавление", DataBase.ColLocation.Local, true, true);
             T.UTable.Columns.AddBool("Update", "Изменение", DataBase.ColLocation.Local, true, true);
@@ -187,7 +189,7 @@ namespace LaboratoryOnlineJournal
             T.UTable.AutoSave(false, DataBase.TypeOfTable.Remote);
             G.UTable = T.UTable.CreateSubTable(false);
 
-            T.SPool = data.T1.Tables.Add("SPool", "Пул синхронизаций");
+            T.SPool = db.Tables.Add("SPool", "Пул синхронизаций");
             T.SPool.Columns.AddRelation(T.User.GetColumn(C.User.Login), "A", T.User.AlterName + " автор");
             T.SPool.Columns.AddRelation(T.User.GetColumn(C.User.Login), "S", T.User.AlterName + " отправитель");
             T.SPool.Columns.AddBool("local", "создано локально");
@@ -195,7 +197,16 @@ namespace LaboratoryOnlineJournal
             T.SPool.AutoSave(false, DataBase.TypeOfTable.Remote);
             G.SPool = T.SPool.CreateSubTable(false);
 
-            data.SynchPool = new SynchPool_class();
+            var serializeProviders = GetSerializeProviders(db);
+            data.SynchPool = new SynchPool_class(db, serializeProviders.Last().Name, serializeProviders);
+        }
+
+        public static ISerializeFormatProvider[] GetSerializeProviders(DataBase dataBase)
+        {
+            var oldProvider = new OldSerializeFormatProvider(Encoding.UTF32, dataBase);
+            var csvProvider = new CSVSerializeFormatProvider(Encoding.UTF32, dataBase);
+
+            return new ISerializeFormatProvider[] { oldProvider, csvProvider };
         }
     }
 }

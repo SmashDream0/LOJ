@@ -119,7 +119,7 @@ public partial class Startup_Form : Form //форма выбора пользо�
             }
         }
 
-        if (new StartupLogo_Form(Misc.DataBaseLoadFT).ShowDialog() != System.Windows.Forms.DialogResult.OK)
+        if (new StartupLogo_Form(data.T1, Misc.DataBaseLoadFT).ShowDialog() != System.Windows.Forms.DialogResult.OK)
         { this.Close(); }
 
         CanUse_timer.Interval = StandartIndervalCanUse;
@@ -181,7 +181,7 @@ public partial class Startup_Form : Form //форма выбора пользо�
         }
 
         this.Visible = false;
-        if (new StartupLogo_Form(Misc.DataBaseLoad).ShowDialog() == System.Windows.Forms.DialogResult.OK)
+        if (new StartupLogo_Form(data.T1, Misc.DataBaseLoad).ShowDialog() == System.Windows.Forms.DialogResult.OK)
         {
             data.UserID = UserID;  //записываю id текущего пользователя
 

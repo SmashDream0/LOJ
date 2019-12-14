@@ -24,6 +24,10 @@ namespace LaboratoryOnlineJournal
         public static readonly byte[] smth = { 48, 86, 3, 24, 125, 123, 55, 4, 5, 8, 89, 84, 89, 8, 23, 32, 12, 10, 32, 158, 250, 1, 2, 15, 0, 0, 5, 18, 51, 81, 68, 8, 97, 87, 8, 9, 78, 78, 78, 42, 1, 25, 4, 54, 8, 4, 56, 5, 24, 5, 45, 4, 8, 4, 255, 2 };
         /// <summary>менять нельзя</summary>
         public const int pass = 2048;
+        /// <summary>
+        /// Проверять ли наличие таблицы, при её добавлении
+        /// </summary>
+        public static bool CheckTablesExist = true;
 
         public static byte Round { get { return data.User<byte>(C.User.Round); } }
         /// <summary>Получить краткое фио сотрудника, с его профессией</summary>
@@ -343,15 +347,15 @@ namespace LaboratoryOnlineJournal
             return Encoding.Default.GetString(One, 0, j);
         }
 
-        static bool AddSynch(StartupLogo_Form.Loading_class Loading, string Name, string AlterName, ref DataBase.ITable Table, ref DataBase.ISTable SubTable, AddCols_delegate AddCols, bool Dedicate)
+        static bool AddSynch(DataBase db, StartupLogo_Form.Loading_class Loading, string Name, string AlterName, ref DataBase.ITable Table, ref DataBase.ISTable SubTable, AddCols_delegate AddCols, bool Dedicate)
         {
             if (Loading != null)
             { Loading.LoadingComment = Name; }
 
-            if (Table != null)
+            if (CheckTablesExist && Table != null)
             { throw new Exception("Таблица уже существует!"); }
 
-            Table = data.T1.Tables.Add(Encoding.GetEncoding(866), Name, AlterName);
+            Table = db.Tables.Add(Encoding.GetEncoding(866), Name, AlterName);
             AddCols(Table);
 
             Table.AutoSave(Dedicate, DataBase.TypeOfTable.Combine);
@@ -371,15 +375,15 @@ namespace LaboratoryOnlineJournal
             }
         }
 
-        static bool AddRemote(StartupLogo_Form.Loading_class Loading, string Name, string AlterName, ref DataBase.ITable Table, ref DataBase.ISTable SubTable, AddCols_delegate AddCols, bool Dedicate)
+        static bool AddRemote(DataBase db, StartupLogo_Form.Loading_class Loading, string Name, string AlterName, ref DataBase.ITable Table, ref DataBase.ISTable SubTable, AddCols_delegate AddCols, bool Dedicate)
         {
             if (Loading != null)
             { Loading.LoadingComment = Name; }
 
-            if (Table != null)
+            if (CheckTablesExist && Table != null)
             { throw new Exception("Таблица уже существует!"); }
 
-            Table = data.T1.Tables.Add(Encoding.GetEncoding(866), Name, AlterName);
+            Table = db.Tables.Add(Encoding.GetEncoding(866), Name, AlterName);
 
             AddCols(Table);
 

@@ -124,6 +124,12 @@
     <Compile Include="admin\UsersBlock_Form.Designer.cs">
       <DependentUpon>UsersBlock_Form.cs</DependentUpon>
     </Compile>
+    <Compile Include="ByteWork\base.cs" />
+    <Compile Include="ByteWork\ByteIO.cs" />
+    <Compile Include="ByteWork\ByteReader.cs" />
+    <Compile Include="Cryption\BlankEncryption.cs" />
+    <Compile Include="Cryption\ICryption.cs" />
+    <Compile Include="Cryption\OldEncryption.cs" />
     <Compile Include="Employe\ChangePeriod_Form.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -142,6 +148,13 @@
     <Compile Include="Employe\LoadDBUpdates_Form.Designer.cs">
       <DependentUpon>LoadDBUpdates_Form.cs</DependentUpon>
     </Compile>
+    <Compile Include="FormatChecker\CSVFormatChecker.cs" />
+    <Compile Include="FormatChecker\IFormatChecker.cs" />
+    <Compile Include="FormatChecker\OldFormatChecker.cs" />
+    <Compile Include="SerializeFormatProvider\CSVSerializeFormatProvider.cs" />
+    <Compile Include="SerializeFormatProvider\OldSerializeFormatProvider.cs" />
+    <Compile Include="SerializeFormatProvider\SerializeFormatProvider.cs" />
+    <Compile Include="SerializeFormatProvider\ISerializeFormatProvider.cs" />
     <Compile Include="Forms\MassOutgo\MassOutGo.cs" />
     <Compile Include="Forms\MassOutgo\MassOutgoOtch.cs" />
     <Compile Include="Forms\MassOutgo\MassOutgo_Form.cs">
@@ -245,6 +258,12 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
+    <Compile Include="SerializerFrovider\CSVSerializeProvider.cs" />
+    <Compile Include="SerializerFrovider\DeserializeResult.cs" />
+    <Compile Include="SerializerFrovider\ISerializeProvider.cs" />
+    <Compile Include="SerializerFrovider\OldByteSerializeProvider.cs" />
+    <Compile Include="SerializerFrovider\Row.cs" />
+    <Compile Include="SerializerFrovider\Table.cs" />
     <Compile Include="Startup\Mail_Form.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -275,6 +294,8 @@
     <Compile Include="Startup\TimeLessPass_Form.Designer.cs">
       <DependentUpon>TimeLessPass_Form.cs</DependentUpon>
     </Compile>
+    <Compile Include="Synch\SynchTable.cs" />
+    <Compile Include="Synch\SynchManager.cs" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="admin\AboutForm.resx">
@@ -360,7 +381,7 @@
     <Content Include="lib\7z32_cp.dll" />
     <Content Include="lib\7z64.dll" />
     <Content Include="lib\7z64_cp.dll" />
-    <Content Include="lib\AutoTable.dll" />
+    <None Include="lib\AutoTable.dll" />
     <Content Include="lib\ICSharpCode.SharpZipLib.dll" />
     <Content Include="lib\ImapX.dll" />
     <Content Include="lib\ImapX_cp.dll" />
@@ -396,6 +417,5 @@
       <Install>false</Install>
     </BootstrapperPackage>
   </ItemGroup>
-  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

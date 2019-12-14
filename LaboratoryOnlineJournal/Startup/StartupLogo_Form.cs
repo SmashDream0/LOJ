@@ -19,12 +19,12 @@ public partial class StartupLogo_Form : Form
 
     public class Loading_class
     {
-        public Loading_class(Loading_delegate action)
+        public Loading_class(DataBase db, Loading_delegate action)
         {
-            thread = new Thread(() => { action(this); });
+            thread = new Thread(() => { action(db, this); });
             thread.Start();
         }
-        public delegate void Loading_delegate(Loading_class LC);
+        public delegate void Loading_delegate(DataBase db, Loading_class LC);
 
         public string LoadingComment;
 
@@ -43,11 +43,11 @@ public partial class StartupLogo_Form : Form
         }
     }
 
-    public StartupLogo_Form(Loading_class.Loading_delegate action)
+    public StartupLogo_Form(DataBase db, Loading_class.Loading_delegate action)
     {
         InitializeComponent();
 
-        Loading = new Loading_class(action);
+        Loading = new Loading_class(db, action);
     }
 
     const byte MaxCount = 4;

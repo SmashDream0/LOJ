@@ -147,12 +147,109 @@ public static class data
 public static class T
 {
     public static DataBase.ITable User, UType, Podr, PodrPpl, People, Prfssn, PnMean, EdType, OPType, Mark, MError, Sample, SM, SPoint, Adress, PType, SCause, PSG, Period, PMNorm, SMS, SPT, Area, Norm, NType, OLocation, Method/*, VGroup*/, MVolume, OType, Object, SPool, Prt, PrtS, OPT, PSGM, Resp, TResp, SGroup, BackGrd, PaPoS, UTable, VarType, TestCond, TCS;
+
+    public static void Clear()
+    {
+        T.User = null;
+        T.UType = null;
+        T.Podr = null;
+        T.PodrPpl = null;
+        T.People = null;
+        T.Prfssn = null;
+        T.PnMean = null;
+        T.EdType = null;
+        T.OPType = null;
+        T.Mark = null;
+        T.MError = null;
+        T.Sample = null;
+        T.SM = null;
+        T.SPoint = null;
+        T.Adress = null;
+        T.PType = null;
+        T.SCause = null;
+        T.PSG = null;
+        T.Period = null;
+        T.PMNorm = null;
+        T.SMS = null;
+        T.SPT = null;
+        T.Area = null;
+        T.Norm = null;
+        T.NType = null;
+        T.OLocation = null;
+        T.Method = null;
+        T.MVolume = null;
+        T.OType = null;
+        T.Object = null;
+        T.SPool = null;
+        T.Prt = null;
+        T.PrtS = null;
+        T.OPT = null;
+        T.PSGM = null;
+        T.Resp = null;
+        T.TResp = null;
+        T.SGroup = null;
+        T.BackGrd = null;
+        T.PaPoS = null;
+        T.UTable = null;
+        T.VarType = null;
+        T.TestCond = null;
+        T.TCS = null;
+    }
 }
 
 /// <summary>Уникальные табличные представления</summary>
 public static class G
 {
     public static DataBase.ISTable User, UType, Podr, PodrPpl, People, Prfssn, PnMean, EdType, OPType, Mark, MError, Sample, SM, SMMiddle, SPoint, Adress, PType, SCause, PSG, Period, PMNorm, SMS, SPT, Area, Norm, NType, OLocation, Method/*, VGroup*/, MVolume, OType, Object, SPool, Prt, PrtS, OPT, PSGM, Resp, TResp, SGroup, BackGrd, PaPoS, UTable, VarType, TestCond, TCS;
+
+    public static void Clear()
+    {
+        G.User = null;
+        G.UType = null;
+        G.Podr = null;
+        G.PodrPpl = null;
+        G.People = null;
+        G.Prfssn = null;
+        G.PnMean = null;
+        G.EdType = null;
+        G.OPType = null;
+        G.Mark = null;
+        G.MError = null;
+        G.Sample = null;
+        G.SM = null;
+        G.SMMiddle = null;
+        G.SPoint = null;
+        G.Adress = null;
+        G.PType = null;
+        G.SCause = null;
+        G.PSG = null;
+        G.Period = null;
+        G.PMNorm = null;
+        G.SMS = null;
+        G.SPT = null;
+        G.Area = null;
+        G.Norm = null;
+        G.NType = null;
+        G.OLocation = null;
+        G.Method = null;
+        G.MVolume = null;
+        G.OType = null;
+        G.Object = null;
+        G.SPool = null;
+        G.Prt = null;
+        G.PrtS = null;
+        G.OPT = null;
+        G.PSGM = null;
+        G.Resp = null;
+        G.TResp = null;
+        G.SGroup = null;
+        G.BackGrd = null;
+        G.PaPoS = null;
+        G.UTable = null;
+        G.VarType = null;
+        G.TestCond = null;
+        G.TCS = null;
+    }
 }
 
 /// <summary>Колонки таблиц</summary>

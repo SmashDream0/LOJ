@@ -18,11 +18,14 @@ namespace LaboratoryOnlineJournal
 {
     public static partial class Misc
     {
-        public static void DataBaseLoad(StartupLogo_Form.Loading_class Loading)
+        public static void DataBaseLoad(DataBase db, StartupLogo_Form.Loading_class Loading)
         {
             if (Loading != null)
             { Loading.LoadingComment = "SPool"; }
-            data.SynchPool.Prepare();
+
+            if (data.SynchPool != null)
+            { data.SynchPool.Prepare(); }
+
             /*  
                 река(речные нормы)
                 питьевая(питьевые нормы)
@@ -34,7 +37,7 @@ namespace LaboratoryOnlineJournal
                 очищенное в воду(нормы на очищенное)
              */
 
-            if (!AddRemote(Loading, "Prfssn", "Професия", ref T.Prfssn, ref G.Prfssn,
+            if (!AddRemote(db, Loading, "Prfssn", "Професия", ref T.Prfssn, ref G.Prfssn,
                      newTable =>
                      {
                          newTable.Columns.AddString("Name", "Наименование", 85);
@@ -43,7 +46,7 @@ namespace LaboratoryOnlineJournal
                          newTable.Columns.Add_Unique("Name");
                      }, false)) { return; }
 
-            if (!AddRemote(Loading, "People", "Сотрудник", ref T.People, ref G.People,
+            if (!AddRemote(db, Loading, "People", "Сотрудник", ref T.People, ref G.People,
                 newTable =>
                 {
                     newTable.Columns.AddString("Name1", "Фамилия", 30);
@@ -54,7 +57,7 @@ namespace LaboratoryOnlineJournal
                     //newTable.Columns.Add_Unique(C.People.name1, C.People.name2, C.People.name3, C.People.Prfssn);
                 }, false)) { return; }
 
-            if (!AddRemote(Loading, "PSGM", "Метод для группы", ref T.PSGM, ref G.PSGM,
+            if (!AddRemote(db, Loading, "PSGM", "Метод для группы", ref T.PSGM, ref G.PSGM,
                      newTable =>
                      {
                          newTable.Columns.AddInt32("YM", "Период начала использования");
@@ -65,7 +68,7 @@ namespace LaboratoryOnlineJournal
                          newTable.Columns.Add_Unique(C.PSGM.YM, C.PSGM.PSG);
                      }, false)) { return; }
 
-            if (!AddRemote(Loading, "PodrPpl", "Сотрудник в подразделении", ref T.PodrPpl, ref G.PodrPpl,
+            if (!AddRemote(db, Loading, "PodrPpl", "Сотрудник в подразделении", ref T.PodrPpl, ref G.PodrPpl,
                 newTable =>
                 {
                     newTable.Columns.AddRelation(T.Podr.GetColumn(C.Podr.ShrName));   //
@@ -81,7 +84,7 @@ namespace LaboratoryOnlineJournal
                 (R) => { return Misc.GetPWP(T.PodrPpl.Rows.Get_UnShow<uint>(R.ID, C.PodrPpl.People)); });
             T.PodrPpl.Add(C.PodrPpl.Podr);
 
-            if (!AddRemote(Loading, "Resp", "Ответственность", ref T.Resp, ref G.Resp,
+            if (!AddRemote(db, Loading, "Resp", "Ответственность", ref T.Resp, ref G.Resp,
                 newTable =>
                 {
                     newTable.Columns.AddRelation(T.PodrPpl.GetColumn(C.PodrPpl.People));   //
@@ -94,7 +97,7 @@ namespace LaboratoryOnlineJournal
             T.Resp.Add("Сотрудник", (R) => { return Misc.GetShortFIO(T.Resp.Rows.Get_UnShow<uint>(R.ID, C.Resp.PodrPpl, C.PodrPpl.People)); });
             T.Resp.Add(C.Resp.TResp);
 
-            if (!AddSynch(Loading, "EdType", "Единица измерений", ref T.EdType, ref G.EdType,
+            if (!AddSynch(db, Loading, "EdType", "Единица измерений", ref T.EdType, ref G.EdType,
                 newTable =>
                 {
                     newTable.Columns.AddString("Name", "Наименование", 25);
@@ -103,7 +106,7 @@ namespace LaboratoryOnlineJournal
                     newTable.Columns.Add_Unique(C.EdType.Name);
                 }, false)) { return; }
 
-            if (!AddSynch(Loading, "BackGrd", "Группа фона", ref T.BackGrd, ref G.BackGrd,
+            if (!AddSynch(db, Loading, "BackGrd", "Группа фона", ref T.BackGrd, ref G.BackGrd,
                 newTable =>
                 {
                     newTable.Columns.AddString("Name", "Наименование", 25);
@@ -111,7 +114,7 @@ namespace LaboratoryOnlineJournal
                     newTable.Columns.Add_Unique(C.BackGrd.Name);
                 }, false)) { return; }
 
-            if (!AddSynch(Loading, "OPType", "Единица измерений вывода", ref T.OPType, ref G.OPType,
+            if (!AddSynch(db, Loading, "OPType", "Единица измерений вывода", ref T.OPType, ref G.OPType,
                 newTable =>
                 {
                     newTable.Columns.AddDOUBLE("Multy", "Множитель");
@@ -121,7 +124,7 @@ namespace LaboratoryOnlineJournal
                     newTable.Columns.Add_Unique(C.OPType.EdTypeT, C.OPType.EdTypeF);
                 }, false)) { return; }
 
-            if (!AddSynch(Loading, "Mark", "Показатель", ref T.Mark, ref G.Mark,
+            if (!AddSynch(db, Loading, "Mark", "Показатель", ref T.Mark, ref G.Mark,
                 newTable =>
                 {
                     newTable.Columns.AddInt32("Code", "Код");
@@ -140,7 +143,7 @@ namespace LaboratoryOnlineJournal
             T.Mark.Rows.SetAddForm(C.Mark.GetEdit);
             T.Mark.Rows.SetEditForm(C.Mark.GetEdit);
 
-            if (!AddSynch(Loading, "PType", "Тип пробы", ref T.PType, ref G.PType, //Probe Type
+            if (!AddSynch(db, Loading, "PType", "Тип пробы", ref T.PType, ref G.PType, //Probe Type
                 newTable =>
                 {
                     newTable.Columns.AddString("Name", "Наименование", 50);
@@ -148,7 +151,7 @@ namespace LaboratoryOnlineJournal
                     newTable.Columns.Add_Unique(C.PType.Name);
                 }, false)) { return; }
 
-            if (!AddSynch(Loading, "SCause", "Цель испытания", ref T.SCause, ref G.SCause, //Probe Cause
+            if (!AddSynch(db, Loading, "SCause", "Цель испытания", ref T.SCause, ref G.SCause, //Probe Cause
                 newTable =>
                 {
                     newTable.Columns.AddString("Name", "Наименование", 200);
@@ -156,7 +159,7 @@ namespace LaboratoryOnlineJournal
                     newTable.Columns.Add_Unique(C.SCause.Name);
                 }, false)) { return; }
 
-            if (!AddSynch(Loading, "Norm", "Норматив", ref T.Norm, ref G.Norm,
+            if (!AddSynch(db, Loading, "Norm", "Норматив", ref T.Norm, ref G.Norm,
                 newTable =>
                 {
                     newTable.Columns.AddString("Name", "Наименование", 50);
@@ -181,7 +184,7 @@ namespace LaboratoryOnlineJournal
                 });
             T.Norm.Add(C.Norm.Enabled);
 
-            if (!AddSynch(Loading, "Method", "Метод", ref T.Method, ref G.Method,
+            if (!AddSynch(db, Loading, "Method", "Метод", ref T.Method, ref G.Method,
                 newTable =>
                 {
                     newTable.Columns.AddString("Name", "Наименование", 55);
@@ -191,7 +194,7 @@ namespace LaboratoryOnlineJournal
                     newTable.Columns.Add_Unique(C.Method.Norm, C.Method.Mark);
                 }, false)) { return; }
 
-            if (!AddSynch(Loading, "MError", "Точность измерений", ref T.MError, ref G.MError,
+            if (!AddSynch(db, Loading, "MError", "Точность измерений", ref T.MError, ref G.MError,
                 newTable =>
                 {
                     newTable.Columns.AddRelation(T.Norm.GetColumn(C.Norm.Name));
@@ -205,7 +208,7 @@ namespace LaboratoryOnlineJournal
                 }, false)) { return; }
             G.MError.Get_Default();
 
-            if (!AddSynch(Loading, "OLocation", "Место", ref T.OLocation, ref G.OLocation,   //Object location
+            if (!AddSynch(db, Loading, "OLocation", "Место", ref T.OLocation, ref G.OLocation,   //Object location
                 newTable =>
                 {
                     newTable.Columns.AddString("Name", "Наименование", 50);
@@ -215,7 +218,7 @@ namespace LaboratoryOnlineJournal
                     newTable.Columns.Add_Unique(C.OLocation.Name);
                 }, false)) { return; }
 
-            if (!AddSynch(Loading, "OType", "Тип объекта", ref T.OType, ref G.OType,   //Object Type
+            if (!AddSynch(db, Loading, "OType", "Тип объекта", ref T.OType, ref G.OType,   //Object Type
                 newTable =>
                 {
                     newTable.Columns.AddString("Name", "Наименование", 25);
@@ -223,7 +226,7 @@ namespace LaboratoryOnlineJournal
                     newTable.Columns.Add_Unique(C.OType.Name);
                 }, false)) { return; }
 
-            if (!AddSynch(Loading, "Object", "Объект испытания", ref T.Object, ref G.Object,   //Object Type
+            if (!AddSynch(db, Loading, "Object", "Объект испытания", ref T.Object, ref G.Object,   //Object Type
                 newTable =>
                 {
                     newTable.Columns.AddString("Name", "Наименование", 100);
@@ -236,7 +239,7 @@ namespace LaboratoryOnlineJournal
                     newTable.Columns.Add_Unique(C.Object.Name, C.Object.OLocationFrom, C.Object.OLocationTo);
                 }, false)) { return; }
 
-            if (!AddSynch(Loading, "PMNorm", "Значение нормы", ref T.PMNorm, ref G.PMNorm, //Podr Mark
+            if (!AddSynch(db, Loading, "PMNorm", "Значение нормы", ref T.PMNorm, ref G.PMNorm, //Podr Mark
                 newTable =>
                 {
                     newTable.Columns.AddRelation(T.Norm.GetColumn(C.Norm.Name));
@@ -250,7 +253,7 @@ namespace LaboratoryOnlineJournal
                     newTable.Columns.Add_Unique(C.PMNorm.Norm, C.PMNorm.Mark, C.PMNorm.Podr, C.PMNorm.OLocation);
                 }, false)) { return; }
 
-            if (!AddSynch(Loading, "Area", "Район", ref T.Area, ref G.Area,
+            if (!AddSynch(db, Loading, "Area", "Район", ref T.Area, ref G.Area,
                 newTable =>
                 {
                     newTable.Columns.AddString("Name", "Наименование", 50);
@@ -258,7 +261,7 @@ namespace LaboratoryOnlineJournal
                     newTable.Columns.Add_Unique(C.Area.Name);
                 }, false)) { return; }
 
-            if (!AddSynch(Loading, "MVolume", "Объём выпуска", ref T.MVolume, ref G.MVolume, //Month Group
+            if (!AddSynch(db, Loading, "MVolume", "Объём выпуска", ref T.MVolume, ref G.MVolume, //Month Group
                 newTable =>
                 {
                     newTable.Columns.AddRelation(T.OLocation.GetColumn(C.OLocation.Name));
@@ -275,7 +278,7 @@ namespace LaboratoryOnlineJournal
             T.MVolume.Add(T.MVolume.GetColumn(C.MVolume.YM).AlterName, (R) => ATMisc.GetDateTimeFromYM(G.MVolume.Rows.Get<int>(R, C.MVolume.YM)).ToShortDateString());
             T.MVolume.Add(C.MVolume.Volume);
 
-            if (!AddSynch(Loading, "PaPoS", "План и место отбора образцов", ref T.PaPoS, ref G.PaPoS, //Plan and place of sampling
+            if (!AddSynch(db, Loading, "PaPoS", "План и место отбора образцов", ref T.PaPoS, ref G.PaPoS, //Plan and place of sampling
                 newTable =>
                 {
                     newTable.Columns.AddString("Name", "Наименование", 75);
@@ -283,7 +286,7 @@ namespace LaboratoryOnlineJournal
                     newTable.Columns.Add_Unique(C.PaPoS.Name);
                 }, false)) { return; }
 
-            if (!AddRemote(Loading, "SPoint", "Точка отбора", ref T.SPoint, ref G.SPoint,    //Sample point
+            if (!AddRemote(db, Loading, "SPoint", "Точка отбора", ref T.SPoint, ref G.SPoint,    //Sample point
                 newTable =>
                 {//
                     newTable.Columns.AddInt32("Number", "Номер");
@@ -309,7 +312,7 @@ namespace LaboratoryOnlineJournal
             T.SPoint.Rows.SetEditForm(C.SPoint.GetEdit);
             T.SPoint.Rows.SetAddForm(C.SPoint.GetEdit);
 
-            if (!AddRemote(Loading, "Sample", "Замер", ref T.Sample, ref G.Sample,
+            if (!AddRemote(db, Loading, "Sample", "Замер", ref T.Sample, ref G.Sample,
                 newTable =>
                 {
                     newTable.Columns.AddRelation(T.SPoint.GetColumn(C.SPoint.Name));
@@ -323,7 +326,7 @@ namespace LaboratoryOnlineJournal
                     //newTable.Columns.Add_Unique(C.Sample.SPoint, C.Sample.Loc);
                 }, false)) { return; }
             
-            if (!AddSynch(Loading, "TestCond", "Тип условия испытания", ref T.TestCond, ref G.TestCond, //Test condition
+            if (!AddSynch(db, Loading, "TestCond", "Тип условия испытания", ref T.TestCond, ref G.TestCond, //Test condition
                 newTable =>
                 {
                     newTable.Columns.AddRelation(T.SPoint.GetColumn(C.SPoint.Name));
@@ -336,7 +339,7 @@ namespace LaboratoryOnlineJournal
             T.TestCond.Rows.SetAddForm(C.TestCond.GetEdit);
             T.TestCond.Rows.SetEditForm(C.TestCond.GetEdit);
 
-            if (!AddSynch(Loading, "TCS", "Условие испытания", ref T.TCS, ref G.TCS, //Test condition sample
+            if (!AddSynch(db, Loading, "TCS", "Условие испытания", ref T.TCS, ref G.TCS, //Test condition sample
                 newTable =>
                 {
                     newTable.Columns.AddRelation(T.Sample.GetColumn(C.Sample.CYMD));
@@ -349,7 +352,7 @@ namespace LaboratoryOnlineJournal
             T.TCS.Rows.SetAddForm(C.TCS.GetEdit);
             T.TCS.Rows.SetEditForm(C.TCS.GetEdit);
 
-            if (!AddRemote(Loading, "SMS", "Показатель к точке отбора", ref T.SMS, ref G.SMS,
+            if (!AddRemote(db, Loading, "SMS", "Показатель к точке отбора", ref T.SMS, ref G.SMS,
                 newTable =>
                 {
                     newTable.Columns.AddRelation(T.SPoint.GetColumn(C.SPoint.Name));
@@ -361,7 +364,7 @@ namespace LaboratoryOnlineJournal
             T.Sample.Rows.SetAddForm(C.Sample.GetEdit);
             T.Sample.Rows.SetEditForm(C.Sample.GetEdit);
 
-            if (!AddRemote(Loading, "SM", "Концентрация к показателю", ref T.SM, ref G.SM,
+            if (!AddRemote(db, Loading, "SM", "Концентрация к показателю", ref T.SM, ref G.SM,
                 newTable =>
                 {
                     newTable.Columns.AddRelation(T.Sample.GetColumn(C.Sample.AYMD));
@@ -377,7 +380,7 @@ namespace LaboratoryOnlineJournal
 
             G.SMMiddle = T.SM.CreateSubTable();
 
-            if (!AddRemote(Loading, "Prt", "Протокол", ref T.Prt, ref G.Prt,
+            if (!AddRemote(db, Loading, "Prt", "Протокол", ref T.Prt, ref G.Prt,
                 newTable =>
                 {
                     newTable.Columns.AddInt32("YM", "Месяц");
@@ -397,7 +400,7 @@ namespace LaboratoryOnlineJournal
                     //newTable.Columns.Add_Unique(C.Prt.YM, C.Prt.Number);
                 }, false)) { return; }
 
-            if (!AddRemote(Loading, "PrtS", "Отборы протокола", ref T.PrtS, ref G.PrtS,
+            if (!AddRemote(db, Loading, "PrtS", "Отборы протокола", ref T.PrtS, ref G.PrtS,
                 newTable =>
                 {
                     newTable.Columns.AddRelation(T.Prt.GetColumn(C.Prt.Number));

@@ -11,15 +11,31 @@ using System.Security.Authentication;
 using System.Runtime.InteropServices;
 using System.Reflection;
 using System.Threading;
+using LaboratoryOnlineJournal.Serializer;
+using LaboratoryOnlineJournal.SerializeFormatProvider;
 
 namespace LaboratoryOnlineJournal
 {
     /// <summary>Синхронизация БД</summary>
     public unsafe class SynchPool_class
     {
-        public SynchPool_class()
+        public SynchPool_class(DataBase db, String defaultSerializerName, IEnumerable<ISerializeFormatProvider> formatProvider)
         {
+            _db = db;
             SPool = T.SPool.CreateSubTable(false);
+            _formatProviders = formatProvider;
+            _defaultSerializerName = defaultSerializerName;
+        }
+
+        private readonly String _defaultSerializerName;
+        private readonly DataBase _db;
+        private readonly IEnumerable<ISerializeFormatProvider> _formatProviders;
+
+        private ISerializeFormatProvider GetSerializeProvider()
+        {
+            var result = _formatProviders.First(x=> String.Equals(x.Name, _defaultSerializerName));
+
+            return result;
         }
 
         /// <summary>Таблица синхронизации</summary>
@@ -29,14 +45,19 @@ namespace LaboratoryOnlineJournal
             {
                 this.Parent = Parent;
                 this.Table = Table;
-                this.Table.Parent.Columns.AddRelation(T.SPool.GetColumn(C.SPool.Date), false, false);
 
-                var LCTable = this.Table.Parent.Name.ToLower();
+                if (!RelationColumnExist(this.Table.Parent, "SPool"))
+                { this.Table.Parent.Columns.AddRelation(T.SPool.GetColumn(C.SPool.Date), false, false); }
+
                 this.ID = 0;
+
+                var tableName = Table.Parent.Name;
 
                 for (int i = 0; i < Parent._UTable.Rows.Count; i++)
                 {
-                    if (LCTable == Parent._UTable.Rows.Get<string>(i, C.UTable.Name).ToLower())
+                    var uTableName = Parent._UTable.Rows.Get<string>(i, C.UTable.Name);
+
+                    if (String.Equals(tableName, uTableName, StringComparison.InvariantCultureIgnoreCase))
                     {
                         this.ID = Parent._UTable.Rows.GetID(i);
 
@@ -46,6 +67,24 @@ namespace LaboratoryOnlineJournal
                         break;
                     }
                 }
+            }
+
+            private static bool RelationColumnExist(DataBase.ITable table, string columnName)
+            {
+                var result = false;
+
+                for (int i = 0; i < table.Columns.Count; i++)
+                {
+                    var column = table.GetColumn(i);
+
+                    if (column.Name == columnName)
+                    {
+                        result = true;
+                        break;
+                    }
+                }
+
+                return result;
             }
 
             uint ID;
@@ -84,6 +123,11 @@ namespace LaboratoryOnlineJournal
                     { Table.Parent.Rows.SetValue += Parent.SetPoolAction; }
                 }
             }
+
+            public override string ToString()
+            {
+                return Table.Name.ToString();
+            }
         }
 
         /// <summary>Обновить список таблиц синхронизации</summary>
@@ -95,12 +139,12 @@ namespace LaboratoryOnlineJournal
             var UTableList = new List<UTable_struct>();
             _UTable = UTable;
 
-            for (int i = 0; i < data.T1.Tables.Count; i++)
+            for (int i = 0; i < _db.Tables.Count; i++)
             {
-                if (data.T1.Tables[i].Name.ToLower() != SPool.Parent.Name.ToLower()
-                    && data.T1.Tables[i].Name.ToLower() != UTable.Parent.Name.ToLower()
-                    && (data.T1.Tables[i].RemoteType != DataBase.RemoteType.Local || data.T1.type == DataBase.RemoteType.Local))
-                { UTableList.Add(new UTable_struct(this, data.T1.Tables[i].CreateSubTable(false))); }
+                if (_db.Tables[i].Name.ToLower() != SPool.Parent.Name.ToLower()
+                    && _db.Tables[i].Name.ToLower() != UTable.Parent.Name.ToLower()
+                    && (_db.Tables[i].RemoteType != DataBase.RemoteType.Local || _db.type == DataBase.RemoteType.Local))
+                { UTableList.Add(new UTable_struct(this, _db.Tables[i].CreateSubTable(false))); }
             }
 
             this.UTable = UTableList.ToArray();
@@ -159,7 +203,7 @@ namespace LaboratoryOnlineJournal
                 { return UK[i]; }
             }
 
-            throw new Exception("Неизвестный идентфиикатор");
+            throw new Exception("Неизвестный идентификатор");
         }
         /// <summary>Идентификатор последней синхронизации этой копии БД</summary>
         public uint LastPoolID { get; internal set; }
@@ -167,7 +211,6 @@ namespace LaboratoryOnlineJournal
         public DataBase.ISTable GetUTable(int Index) { return UTable[Index].Table; }
         public bool GetUTableUse(int Index) { return UTable[Index].Use; }
         public bool SetUTableUse(int Index, bool Use) { return UTable[Index].Use = Use; }
-
 
         public uint[] GetSynches(int YM)
         {
@@ -211,59 +254,6 @@ namespace LaboratoryOnlineJournal
         void SetPoolAction(DataBase.ITable _Table, DataBase.AddSet_class Vals)
         { Vals.Add(_Table.Columns.Count - 1, LastPoolID); }
 
-        struct crypt_struct
-        {
-            public crypt_struct(Random rnd, int MinCount)
-            {
-                this.mass = new byte[rnd.Next(MinCount, MinCount * 2)];
-                rnd.NextBytes(mass);
-                this.index = 0;
-            }
-            public crypt_struct(Random rnd, int MinCount, int MaxCount)
-            {
-                this.mass = new byte[rnd.Next(MinCount, MaxCount)];
-                rnd.NextBytes(mass);
-                this.index = 0;
-            }
-            public crypt_struct(byte[] MassFrom)
-            {
-                this.mass = MassFrom;
-                this.index = 0;
-            }
-            public crypt_struct(string Pass)
-            {
-                this.mass = Encoding.UTF32.GetBytes(Pass);
-                this.index = 0;
-            }
-
-            public byte Encrypt(byte b)
-            {
-                if (index > mass.Length - 1)
-                { index = 0; }
-
-                unchecked
-                {
-                    return (byte)(b + mass[index++] - index);
-                }
-            }
-
-            public byte Decrypt(byte b)
-            {
-                if (index > mass.Length - 1)
-                { index = 0; }
-
-                unchecked
-                {
-                    return (byte)(b - mass[index++] + index);
-                }
-            }
-
-            public readonly byte[] mass;
-            int index;
-
-            public string pass { get { return Encoding.UTF32.GetString(mass); } }
-        }
-
         /// <summary>Создать новую точку синхронизации</summary>
         public void AddNewSynch()
         {
@@ -280,73 +270,6 @@ namespace LaboratoryOnlineJournal
             else
             { throw new Exception("Не удалось создать новую точку синхронизации"); }
         }
-        /// <summary>Шифровать массив</summary>
-        /// <param name="UserID">Идентификатор пользователя</param>
-        /// <param name="mass">Массив для шифрования</param>
-        void Encode(uint UserID, ref byte[] mass)
-        {
-            var rnd = new Random();
-
-            var mrpass = new crypt_struct(rnd, mass.Length / 2);   //внутренний пароль смещения   
-            var urbytes = new crypt_struct(rnd, 200, 200);    //внешний пароль смещения
-
-            var passPos = mass.Length;
-            int enckeyLength;
-
-            {
-                //шифрую шифр
-                var rsa = new RSACryptoServiceProvider();
-
-                var uk = GetUserKey(UserID);
-
-                if (uk.EncodeKey == null)
-                { throw new Exception("Обновление не может быть сформировано, т.к. шифрующий код не задан."); }
-
-                {
-                    var k = ((DataBase.table)T.User).EncodeType.GetString(uk.EncodeKey);
-
-                    rsa.FromXmlString(k);
-                }
-
-                var tmp = ByteString(urbytes.mass);
-
-                var enckey = rsa.Encrypt(urbytes.mass, true); //шифрованый шифр
-                
-                tmp = ByteString(enckey);
-
-                enckeyLength = enckey.Length;   //длина шифрованного пароля
-
-                //новая длина, с учетом длины паролей
-                Array.Resize(ref mass, mass.Length + mrpass.mass.Length + enckey.Length + 8);   //+8 - длина внешнего пароля 4(позиция 0) + длина внутреннего пароля(позиция 4)
-
-                //сдвигаю на указатели длин паролей и длины внутреннего + внешнего паролей. id автора не шифруется
-                Array.Copy(mass, 0, mass, 8 + enckey.Length + mrpass.mass.Length, passPos);
-                fixed (void* numPtr = &mass[0])
-                { *(int*)numPtr = enckey.Length; } //длина внешнего пароля
-                fixed (void* numPtr = &mass[4])
-                { *(int*)numPtr = mrpass.mass.Length; } //длина внутреннего пароля
-
-                //копирую внешний пароль
-                Array.Copy(enckey, 0, mass, 8, enckey.Length);
-                //копирую внутренний пароль
-                Array.Copy(mrpass.mass, 0, mass, enckey.Length + 8, mrpass.mass.Length);
-            }
-
-            //шифрую данные первым шифром
-            {
-                int Start = mrpass.mass.Length + enckeyLength + 8;
-                int End = mass.Length - 4;
-                for (int i = Start; i < End; i++)
-                { mass[i] = mrpass.Encrypt(mass[i]); }
-            }
-            //шифрую данные и первый пароль вторым шифром(иначе - все, кроме указателя длины внешнего пароля и id пользователя)
-            {
-                int Start = 8 + enckeyLength;
-                int End = mass.Length - 4;
-                for (int i = Start; i < End; i++)
-                { mass[i] = urbytes.Encrypt(mass[i]); }
-            }
-        }
 
         static string ByteString(byte[] array)
         {
@@ -357,277 +280,41 @@ namespace LaboratoryOnlineJournal
 
             return sb.ToString();
         }
-        /// <summary>Расшифровать массив</summary>
-        /// <param name="mass">Массив шифрации</param>
-        /// <param name="ForceUserID">Идентификатор пользователя. Не обязательно</param>
-        /// <returns></returns>
-        bool Decode(ref byte[] mass, uint ForceUserID = 0)    //работает правильно
-        {
-            uint UserID;
-            fixed (void* numPtr = &mass[mass.Length - 4])
-            { UserID = *(uint*)numPtr; }  //id пользователя
-
-            crypt_struct urbytes, mrpass;
-
-            int enckeyLength;
-
-            {
-                //длина внешнего пароля
-                fixed (void* numPtr = &mass[0])
-                { enckeyLength = *(int*)numPtr; }
-                var tmass = new byte[enckeyLength];
-                Array.Copy(mass, 8, tmass, 0, enckeyLength);
-
-                int m1ln, m2ln;
-                fixed (void* numPtr = &mass[0])
-                { m1ln = *(int*)numPtr; }
-                fixed (void* numPtr = &mass[4])
-                { m2ln = *(int*)numPtr; }
-
-                var uk = GetUserKey((ForceUserID == 0 ? UserID : ForceUserID));
-
-                if (uk.DecodeKey == null)
-                { throw new Exception("Обновление не может быть сформировано, т.к. шифрующий код не задан."); }
-
-                var rsa = new RSACryptoServiceProvider();
-                {
-                    var k = ((DataBase.table)T.User).EncodeType.GetString(uk.EncodeKey);
-
-                    rsa.FromXmlString(k);
-                }
-
-                var tmp = ByteString(tmass);
-
-                urbytes = new crypt_struct(rsa.Decrypt(tmass, true));    //дешифрованный шифр   //тут все правильно!
-            }
-
-            //дешифрую основной и первый пароль вторым шифром
-            {
-                int Start = 8 + enckeyLength;
-                int End = mass.Length - 4;
-                for (int i = Start; i < End; i++)
-                { mass[i] = urbytes.Decrypt(mass[i]); }
-            }
-
-            {
-                int mrpLength;   //длина внутреннего пароля
-                fixed (void* numPtr = &mass[4])
-                { mrpLength = *(int*)numPtr; }
-
-                var tmass = new byte[mrpLength];
-                Array.Copy(mass, 8 + enckeyLength, tmass, 0, tmass.Length);
-
-                mrpass = new crypt_struct(tmass);    //внутренний пароль смещения
-            }
-
-            //дешифрую основной набор первым шифром
-            {
-                int Start = mrpass.mass.Length + enckeyLength + 8;
-                int End = mass.Length - 4;
-                for (int i = Start; i < End; i++)
-                { mass[i] = mrpass.Decrypt(mass[i]); }
-            }
-            {
-                int MassFrom = mrpass.mass.Length + enckeyLength + 8;
-                int MassLength = mass.Length - MassFrom;
-                Array.Copy(mass, MassFrom, mass, 0, MassLength);
-                Array.Resize(ref mass, MassLength);
-            }
-            var mark = Encoding.UTF32.GetString(mass, 0, MarkByteCount);
-
-            return mark == Mark;
-        }
 
         /// <summary>получить шифрованое сообщение</summary>
         public unsafe byte[] GetEncrypted(uint SPoolID)
         {
-            var msg = GetMessage(SPoolID);
+            byte[] message;
+            var UTables = new List<DataBase.ISTable>();
 
-            if (msg == null)
-            { return null; }
+            for (int i = 0; i < UTable.Length; i++)
+            {
+                if (UTable[i].Use)
+                {
+                    UTable[i].Table.QUERRY(DataBase.State.None).SHOW.WHERE.C(UTable[i].Table.Parent.Columns.Count - 1, SPoolID).DO();
 
-            Encode(T.SPool.Rows.Get_UnShow<uint>(SPoolID, C.SPool.AUser), ref msg);
+                    if (UTable[i].Table.Rows.Count > 0)
+                    {
+                        UTables.Add(UTable[i].Table);
+                    }
+                }
+            }
+            var date = T.SPool.Rows.Get<DateTime>(SPoolID, C.SPool.Date);
+            var aUserID = T.SPool.Rows.Get_UnShow<uint>(SPoolID, C.SPool.AUser);
 
-            return msg;
+            var formatProvider = GetSerializeProvider();
+
+            var rsa = GetRSA(aUserID);
+
+            message = formatProvider.EncodeData(rsa, UTables, date, aUserID);
+
+            return message;
         }
         /// <summary>Получить шифрованное сообщение</summary>
         /// <returns></returns>
         public unsafe byte[] GetEncrypted()
         {
             return GetEncrypted(LastPoolID);
-        }
-        /// <summary>Получить не шифрованое сообщение</summary>
-        public unsafe byte[] GetMessage(uint SPoolID)
-        {
-            byte[] message;
-            var UTables = new List<DataBase.ISTable>();
-
-            {
-                int Length = MarkByteCount + sizeof(int) + sizeof(uint) + sizeof(long); //метка + количество таблиц+userID+дата создания пула
-
-                for (int i = 0; i < UTable.Length; i++)
-                {
-                    if (UTable[i].Use)
-                    {
-                        UTable[i].Table.QUERRY(DataBase.State.None).SHOW.WHERE.C(UTable[i].Table.Parent.Columns.Count - 1, SPoolID).DO();
-
-                        if (UTable[i].Table.Rows.Count > 0)
-                        {
-                            UTables.Add(UTable[i].Table);
-                            Length += sizeof(int) * 3 + Encoding.UTF32.GetByteCount(UTable[i].Table.Parent.Name); //длина имени + кол-во записей + общая длина данных по записям + имя таблицы
-
-                            int RowLength = sizeof(int) + sizeof(int) + sizeof(byte);  //длина впереди идущей записи + идентификатор + метка об удалении
-
-                            for (int j = 0; j < UTable[i].Table.Parent.Columns.Count - 1; j++)
-                            {
-                                if (!UTable[i].Table.Parent.GetColumn(j).Protect)
-                                { RowLength += UTable[i].Table.Parent.GetColumn(j).BinarLength * 3; }
-                            }
-
-                            Length += RowLength * UTable[i].Table.Rows.Count;
-                        }
-                    }
-                }
-
-                if (UTables.Count == 0)
-                { return null; }
-                else
-                { message = new byte[Length]; }
-            }
-
-            //Метка
-            var SPos = 0;
-            Encoding.UTF32.GetBytes(Mark, 0, Mark.Length, message, SPos);   //запись
-            SPos += MarkByteCount;
-
-            //кол-во таблиц
-            fixed (void* numPtr = &message[SPos])
-            { *(int*)numPtr = UTables.Count; }  //запись
-            SPos += sizeof(int);
-
-            for (int i = 0; i < UTables.Count; i++)
-            {
-                //длина имени таблицы
-                fixed (void* numPtr = &message[SPos])
-                { *(int*)numPtr = Encoding.UTF32.GetByteCount(UTables[i].Parent.Name); }  //запись
-                SPos += sizeof(int);
-                //имя таблицы
-                Encoding.UTF32.GetBytes(UTables[i].Parent.Name, 0, UTables[i].Parent.Name.Length, message, SPos);   //запись
-                SPos += Encoding.UTF32.GetByteCount(UTables[i].Parent.Name);
-
-                //количество записей
-                var TR = UTables[i].Rows;
-                fixed (void* numPtr = &message[SPos])
-                { *(int*)numPtr = TR.Count; }  //запись
-                SPos += sizeof(int);
-
-                //длина записей таблицы
-                int RowsDataLengthPos = SPos;
-                SPos += sizeof(int);
-
-                for (int j = 0; j < TR.Count; j++)
-                {
-                    //длина записи таблицы
-                    int RowDataLengthPos = SPos;
-                    SPos += sizeof(int);
-
-                    //идентификатор
-                    fixed (void* numPtr = &message[SPos])
-                    { *(uint*)numPtr = TR.GetID(j); }  //запись
-                    SPos += sizeof(uint);
-
-                    //метка об удалении
-                    fixed (void* numPtr = &message[SPos])
-                    { *(DataBase.State*)numPtr = TR.GetStatus(j); }  //запись
-                    SPos += sizeof(DataBase.State);
-
-                    for (int k = 0; k < UTables[i].Parent.Columns.Count - 1; k++)
-                    {
-                        if (!UTables[i].Parent.GetColumn(k).Protect)
-                        {
-                            switch (UTables[i].Parent.GetColumn(k).TypeCol)
-                            {
-                                case DataBase.Types.Bool:
-                                    fixed (void* numPtr = &message[SPos])
-                                    { *(bool*)numPtr = TR.Get_UnShow<bool>(j, k); }  //запись
-                                    SPos += sizeof(bool);
-                                    break;
-                                case DataBase.Types.AutoStatus:
-                                    fixed (void* numPtr = &message[SPos])
-                                    { *(bool*)numPtr = TR.Get_UnShow<bool>(j, k); }  //запись
-                                    SPos += sizeof(bool);
-                                    break;
-                                case DataBase.Types.Byte:
-                                    message[SPos] = TR.Get_UnShow<byte>(j, k);
-                                    SPos += sizeof(byte);
-                                    break;
-                                case DataBase.Types.DateTime:
-                                    fixed (void* numPtr = &message[SPos])
-                                    { *(long*)numPtr = TR.Get_UnShow<DateTime>(j, k).Ticks; }  //запись
-                                    SPos += sizeof(long);
-                                    break;
-                                case DataBase.Types.Double:
-                                    fixed (void* numPtr = &message[SPos])
-                                    { *(double*)numPtr = TR.Get_UnShow<double>(j, k); }   //запись
-                                    SPos += sizeof(double);
-                                    break;
-                                case DataBase.Types.Decimal:
-                                    fixed (void* numPtr = &message[SPos])
-                                    { *(decimal*)numPtr = TR.Get_UnShow<decimal>(j, k); }   //запись
-                                    SPos += sizeof(decimal);
-                                    break;
-                                case DataBase.Types.Int64:
-                                    fixed (void* numPtr = &message[SPos])
-                                    { *(long*)numPtr = TR.Get_UnShow<long>(j, k); }  //запись
-                                    SPos += sizeof(long);
-                                    break;
-                                case DataBase.Types.Int32:
-                                    fixed (void* numPtr = &message[SPos])
-                                    { *(int*)numPtr = TR.Get_UnShow<int>(j, k); }   //запись
-                                    SPos += sizeof(int);
-                                    break;
-                                case DataBase.Types.RIU32:
-                                    fixed (void* numPtr = &message[SPos])
-                                    { *(uint*)numPtr = TR.Get_UnShow<uint>(j, k); }  //запись
-                                    SPos += sizeof(uint);
-                                    break;
-                                case DataBase.Types.String://тут надо бдительничать!
-                                    var Value = TR.Get_UnShow<string>(j, k);
-
-                                    int StrLength = Encoding.UTF32.GetByteCount(Value); //реальное кол-во байтов
-
-                                    fixed (void* numPtr = &message[SPos])
-                                    { *(int*)numPtr = StrLength; }  //запись
-                                    SPos += sizeof(int);
-
-                                    Encoding.UTF32.GetBytes(Value, 0, Value.Length, message, SPos);   //запись
-                                    SPos += StrLength;
-                                    break;
-                                default: throw new Exception("не поддерживаемый тип");
-                            }
-                        }
-                    }
-                    //длина записи таблицы
-                    fixed (void* numPtr = &message[RowDataLengthPos])
-                    { *(int*)numPtr = SPos - RowDataLengthPos - sizeof(int); }  //без учета длины RowDataLengthPos
-                }
-
-                //длина записей таблицы
-                fixed (void* numPtr = &message[RowsDataLengthPos])
-                { *(int*)numPtr = SPos - RowsDataLengthPos - sizeof(int); }   //без учета длины RowsDataLengthPos
-
-            }
-
-            Array.Resize(ref message, SPos + 4 + 8);
-
-            fixed (void* numPtr = &message[SPos])
-            { *(long*)numPtr = T.SPool.Rows.Get<DateTime>(SPoolID, C.SPool.Date).Ticks; }   //запись
-            SPos += sizeof(long);
-
-            fixed (void* numPtr = &message[SPos])
-            { *(uint*)numPtr = T.SPool.Rows.Get_UnShow<uint>(SPoolID, C.SPool.AUser); }  //запись
-
-            return message;
         }
 
         /// <summary>Список таблиц и записей к шифрованию</summary>
@@ -656,64 +343,6 @@ namespace LaboratoryOnlineJournal
                 public readonly uint ID;
                 public readonly DataBase.State InUse;
                 public readonly object[] Values;
-
-                public bool SaveToDB()
-                {
-                    //искать и заменять по индексерам полей неполучится, т.к. записи приходят уже измененные и невозможно определить чем оно там было до изменения
-                    //измененная запись придет в своём измененном виде
-                    //если происходят многократные изменения ключевых полей, тогда хреново, т.к. будут приходить многократные дубликаты с измененными ключевыми полями
-
-                    var RowExist = (bool)Parent.Table.QUERRY(DataBase.State.None).EXIST.WHERE.ID(this.ID).DO()[0].Value;
-
-                    if (RowExist)
-                    {
-                        var Set = Parent.Table.QUERRY(DataBase.State.None).SET;
-
-                        switch (InUse)
-                        {
-                            case DataBase.State.Deleted:
-                                Set.Delete();
-                                break;
-                            case DataBase.State.Normal:
-                                Set.UnDelete();
-                                break;
-                        }
-
-                        try
-                        {
-                            DataBase.ATSettings.AllowQuerryAutoConvertTypes = true;
-
-                            for (int i = 0; i < Values.Length; i++)
-                            {
-                                if (Values[i] != null)
-                                { Set.C(i, Values[i]); }
-                            } 
-                            
-                            Set.WHERE.ID(ID).DO();
-                        }
-                        catch (Exception ex)
-                        {
-                            DataBase.ATSettings.AllowQuerryAutoConvertTypes = false;
-
-                            if (MessageBox.Show("В процессе добавления записи номер " + ID.ToString() + " возникла ошибка:" + ex.Message.ToString() + "\nВы хотите продолжить загрузку?", "Ошибка", MessageBoxButtons.YesNo, MessageBoxIcon.Error) == DialogResult.No)
-                            { return false; }
-                        }
-
-                        DataBase.ATSettings.AllowQuerryAutoConvertTypes = false;
-                    }
-                    else
-                    {
-                        try
-                        { return Parent.Table.Rows.Add(ID, Values, InUse); }
-                        catch (Exception ex)
-                        {
-                            if (MessageBox.Show("В процессе добавления записи номер " + ID.ToString() + " возникла ошибка:" + ex.Message.ToString() + "\nВы хотите продолжить загрузку?", "Ошибка", MessageBoxButtons.YesNo, MessageBoxIcon.Error) == DialogResult.No)
-                            { return false; }
-                        }
-                    }
-
-                    return true;
-                }
 
                 public override string ToString()
                 {
@@ -746,6 +375,64 @@ namespace LaboratoryOnlineJournal
                 return Table.Name + ";RC" + Rows.Length.ToString();
             }
         }
+        
+        public static bool SaveToDB(DataBase.ISTable table, uint id, DataBase.State state, object[] values)
+        {
+            //искать и заменять по индексерам полей неполучится, т.к. записи приходят уже измененные и невозможно определить чем оно там было до изменения
+            //измененная запись придет в своём измененном виде
+            //если происходят многократные изменения ключевых полей, тогда хреново, т.к. будут приходить многократные дубликаты с измененными ключевыми полями
+
+            var RowExist = (bool)table.QUERRY(DataBase.State.None).EXIST.WHERE.ID(id).DO()[0].Value;
+
+            if (RowExist)
+            {
+                var Set = table.QUERRY(DataBase.State.None).SET;
+
+                switch (state)
+                {
+                    case DataBase.State.Deleted:
+                        Set.Delete();
+                        break;
+                    case DataBase.State.Normal:
+                        Set.UnDelete();
+                        break;
+                }
+
+                try
+                {
+                    DataBase.ATSettings.AllowQuerryAutoConvertTypes = true;
+
+                    for (int i = 0; i < values.Length; i++)
+                    {
+                        if (values[i] != null)
+                        { Set.C(i, values[i]); }
+                    }
+
+                    Set.WHERE.ID(id).DO();
+                }
+                catch (Exception ex)
+                {
+                    DataBase.ATSettings.AllowQuerryAutoConvertTypes = false;
+
+                    if (MessageBox.Show("В процессе добавления записи номер " + id.ToString() + " возникла ошибка:" + ex.Message.ToString() + "\nВы хотите продолжить загрузку?", "Ошибка", MessageBoxButtons.YesNo, MessageBoxIcon.Error) == DialogResult.No)
+                    { return false; }
+                }
+
+                DataBase.ATSettings.AllowQuerryAutoConvertTypes = false;
+            }
+            else
+            {
+                try
+                { return table.Rows.Add(id, values, state); }
+                catch (Exception ex)
+                {
+                    if (MessageBox.Show("В процессе добавления записи номер " + id.ToString() + " возникла ошибка:" + ex.Message.ToString() + "\nВы хотите продолжить загрузку?", "Ошибка", MessageBoxButtons.YesNo, MessageBoxIcon.Error) == DialogResult.No)
+                    { return false; }
+                }
+            }
+
+            return true;
+        }
 
         /// <summary>Загрущить шифрованное сообщение</summary>
         /// <param name="mass">Шифрованный массив</param>
@@ -755,16 +442,16 @@ namespace LaboratoryOnlineJournal
         /// <returns></returns>
         public unsafe string LoadCrypted(byte[] mass, bool UseProgressForm, uint ForceUserID = 0, bool ForceLoad = false)
         {
-            Table_class[] Tables;
+            DeserializeResult Tables;
             uint UserID;
             DateTime DT;
             bool SPoolExisted;
-            var Returned = this.GetValues(ForceUserID, mass, out Tables, out UserID, out DT, out SPoolExisted, true);
+            var Returned = this.GetValues(ForceUserID, mass, out Tables, out SPoolExisted, true);
 
             if (Returned == null)
             {
                 if (SPoolExisted && !ForceLoad)
-                { return "Метка синхронизаций уже существует(" + UserID.ToString() + ", " + DT.ToString() + ")"; }
+                { return "Метка синхронизаций уже существует(" + Tables.UserID.ToString() + ", " + Tables.SynchDate.ToString() + ")"; }
 
                 if (UseProgressForm)
                 {
@@ -777,17 +464,21 @@ namespace LaboratoryOnlineJournal
                 }
                 else
                 {
-                    for (int i = 0; i < Tables.Length; i++)
+                    for (int i = 0; i < Tables.Tables.Length; i++)
                     {
-                        Tables[i].Table.Parent.Rows.CanUseEvents = Tables[i].Table.Parent.Rows.AllowGridUpdateEvents = false;
+                        var table = Tables.Tables[i];
 
-                        for (int j = 0; j < Tables[i].Count; j++)
+                        Tables.Tables[i].STable.Parent.Rows.CanUseEvents = Tables.Tables[i].STable.Parent.Rows.AllowGridUpdateEvents = false;
+
+                        for (int j = 0; j < Tables.Tables[i].Rows.Length; j++)
                         {
-                            if (!Tables[i][j].SaveToDB())
+                            var row = table.Rows[i];
+
+                            if (!SaveToDB(table.STable, row.ID, row.InUse, row.Values))
                             { return "Загрузка остановлена пользователем"; }
                         }
 
-                        Tables[i].Table.Parent.Rows.CanUseEvents = Tables[i].Table.Parent.Rows.AllowGridUpdateEvents = true;
+                        Tables.Tables[i].STable.Parent.Rows.CanUseEvents = Tables.Tables[i].STable.Parent.Rows.AllowGridUpdateEvents = true;
                     }
                 }
 
@@ -799,11 +490,11 @@ namespace LaboratoryOnlineJournal
 
         class LoadSPool_class : Progress_Form.AObject
         {
-            public LoadSPool_class(Table_class[] Tables) :
+            public LoadSPool_class(Serializer.DeserializeResult Tables) :
                 base(false)
             { this.Tables = Tables; }
 
-            Table_class[] Tables;
+            Serializer.DeserializeResult Tables;
             public string Returning = null;
 
             protected override bool Do()
@@ -811,29 +502,32 @@ namespace LaboratoryOnlineJournal
                 var MaxCount = 0;
                 var CurCount = 0;
 
-                for (int i = 0; i < Tables.Length; i++)
-                { MaxCount += Tables[i].Rows.Length; }
+                for (int i = 0; i < Tables.Tables.Length; i++)
+                { MaxCount += Tables.Tables[i].Rows.Length; }
 
                 Action(MaxCount, 0);
 
-                for (int i = 0; i < Tables.Length; i++)
+                for (int i = 0; i < Tables.Tables.Length; i++)
                 {
-                    Action(Tables[i].Table.Name, MaxCount, CurCount);
+                    var table = Tables.Tables[i];
 
-                    Tables[i].Table.Parent.Rows.CanUseEvents = Tables[i].Table.Parent.Rows.AllowGridUpdateEvents = false;
+                    Action(Tables.Tables[i].STable.Name, MaxCount, CurCount);
 
-                    for (int j = 0; j < Tables[i].Count; j++)
+                    Tables.Tables[i].STable.Parent.Rows.CanUseEvents = Tables.Tables[i].STable.Parent.Rows.AllowGridUpdateEvents = false;
+
+                    for (int j = 0; j < Tables.Tables[i].Rows.Length; j++)
                     {
                         Action(MaxCount, ++CurCount);
+                        var row = Tables.Tables[i].Rows[j];
 
-                        if (!Tables[i][j].SaveToDB())
+                        if (!SaveToDB(table.STable, row.ID, row.InUse, row.Values))
                         {
                             Returning = "Загрузка остановлена пользователем";
                             return false;
                         }
                     }
 
-                    Tables[i].Table.Parent.Rows.CanUseEvents = Tables[i].Table.Parent.Rows.AllowGridUpdateEvents = true;
+                    Tables.Tables[i].STable.Parent.Rows.CanUseEvents = Tables.Tables[i].STable.Parent.Rows.AllowGridUpdateEvents = true;
                 }
 
                 return true;
@@ -846,222 +540,75 @@ namespace LaboratoryOnlineJournal
         /// <param name="UserID">Полученный идентификатор пользователя</param>
         /// <param name="SynchDT">Полученная дата создания синхронизации</param>
         /// <returns></returns>
-        public unsafe string GetValues(uint ForceUserID, byte[] mass, out Table_class[] Tables, out uint UserID, out DateTime SynchDT, out bool SPoolExisted, bool CheckSPoolExist = false)
+        public unsafe string GetValues(uint ForceUserID, byte[] mass, out DeserializeResult Tables, out bool SPoolExisted, bool CheckSPoolExist = false)
         {
             SPoolExisted = false;
 
             if (mass == null)
             {
-                UserID = 0;
-                SynchDT = new DateTime();
                 Tables = null;
                 return "Сообщение не найдено";
             }
-            else if (Decode(ref mass, ForceUserID))
+            else
             {
-                int SPos = MarkByteCount;
+                var serializerProvider = GetSerializeProvider();
+
+                DeserializeResult result = null;
+
+                foreach (var formatFrovider in _formatProviders)
+                {
+                    if (formatFrovider.TryDecodeData(GetRSA, mass, out result))
+                    { break; }
+                }
+
+                if (result == null)
+                {
+                    CheckSPoolExist = false;
+                    Tables = null;
+                    return "Не удалось декодировать сообщение";
+                }
+
+                Tables = result;
 
                 uint SPoolID = 0;
-
+                if (CheckSPoolExist)
                 {
-                    fixed (void* numPtr = &mass[mass.Length - 4])
-                    { UserID = *(uint*)numPtr; }
+                    //такой пул уже существует, загрузка не требуется
+                    SPoolExisted = (bool)SPool.QUERRY().EXIST.WHERE.C(C.SPool.SUser, Tables.UserID).AND.C(C.SPool.Date, Tables.SynchDate).DO()[0].Value;
 
-                    fixed (void* numPtr = &mass[mass.Length - 8 - 4])
-                    { SynchDT = new DateTime(*(long*)numPtr); }
-
-                    if (CheckSPoolExist)
+                    if (!SPoolExisted)
                     {
-                        //такой пул уже существует, загрузка не требуется
-                        SPoolExisted = (bool)SPool.QUERRY().EXIST.WHERE.C(C.SPool.SUser, UserID).AND.C(C.SPool.Date, SynchDT).DO()[0].Value;
-
-                        if (!SPoolExisted)
-                        {
-                            SPool.QUERRY()
-                                .ADD
-                                    .C(C.SPool.AUser, UserID)
-                                    .C(C.SPool.SUser, UserID)
-                                    .C(C.SPool.Local, false)
-                                    .C(C.SPool.Date, SynchDT)
-                                .DO();
-                            SPoolID = SPool.Rows.GetID(SPool.Rows.Count - 1);
-                        }
+                        SPool.QUERRY()
+                            .ADD
+                                .C(C.SPool.AUser, Tables.UserID)
+                                .C(C.SPool.SUser, Tables.UserID)
+                                .C(C.SPool.Local, false)
+                                .C(C.SPool.Date, Tables.SynchDate)
+                            .DO();
+                        SPoolID = SPool.Rows.GetID(SPool.Rows.Count - 1);
                     }
-                }
-
-                {
-                    int TableCount;
-                    fixed (void* numPtr = &mass[SPos])
-                    { TableCount = *(int*)numPtr; } //количество таблиц
-                    SPos += 4;
-                    Tables = new Table_class[TableCount];
-                }
-
-                //гружу записи
-                for (int i = 0; i < Tables.Length; i++)
-                {
-                    DataBase.ISTable Table;
-                    DataBase.ITable Tbl;
-                    {
-                        string TableName;
-                        int TableNameLength;
-                        fixed (void* numPtr = &mass[SPos])
-                        { TableNameLength = *(int*)numPtr; } //длина имени таблицы
-                        SPos += sizeof(int);
-                        TableName = Encoding.UTF32.GetString(mass, SPos, TableNameLength);  //имя таблицы
-                        SPos += TableNameLength;
-
-                        Tbl = data.T1.Tables[TableName];
-                        if (Tbl == null)
-                        { return "Таблица не найдена: \"" + TableName + "\""; }
-
-                        Table = Tbl.GetSubTable[Tbl.GetSubTable.Count - 1];
-                    }
-                    int RowCount;
-                    fixed (void* numPtr = &mass[SPos])
-                    { RowCount = *(int*)numPtr; }
-                    SPos += sizeof(int);
-
-                    int RowsDataLength, CheckRowsDataLength = 0;
-                    fixed (void* numPtr = &mass[SPos])
-                    { RowsDataLength = *(int*)numPtr; } //длина данных
-                    SPos += sizeof(int);
-
-                    Tables[i] = new Table_class(Table, SPoolID, RowCount);
-
-                    for (int j = 0; j < RowCount; j++)
-                    {
-                        CheckRowsDataLength += sizeof(uint) + sizeof(int) + sizeof(DataBase.State);   //id+метка об удалении + длина записи
-                        int RowDataLength, CheckRowDataLength = sizeof(uint) + sizeof(DataBase.State);  //id+метка об удалении
-
-                        fixed (void* numPtr = &mass[SPos])
-                        { RowDataLength = *(int*)numPtr; }  //длина следующей записи
-                        SPos += sizeof(int);
-
-                        uint ID;
-                        fixed (void* numPtr = &mass[SPos])
-                        { ID = *(uint*)numPtr; }  //идентификатор
-                        SPos += sizeof(uint);
-
-                        DataBase.State InUse;
-                        fixed (void* numPtr = &mass[SPos])
-                        { InUse = *(DataBase.State*)numPtr; }  //метка об удалении
-                        SPos += sizeof(DataBase.State);
-
-                        object[] Values;
-                        int ColumnIndex = 0;
-
-                        Values = new object[Tbl.Columns.Count];
-                        //Values[Values.Length - 1] = SPoolID;
-
-                        Tables[i][j] = new Table_class.Row_class(Tables[i], ID, InUse, Values);
-
-                        //тут важно, чтобы у всех таблиц были колонки relation spool и располагались в конце
-                        for (int k = 0; k < Tbl.Columns.Count - 1; k++)
-                        {
-                            if (!Tbl.GetColumn(k).Protect)
-                            {
-                                switch (Tbl.GetColumn(k).TypeCol)
-                                {
-                                    case DataBase.Types.Bool:
-                                        fixed (void* numPtr = &mass[SPos])
-                                        { Values[k] = *(bool*)numPtr; }
-                                        SPos += sizeof(bool);
-                                        CheckRowDataLength += sizeof(bool);
-                                        CheckRowsDataLength += sizeof(bool);
-                                        break;
-                                    case DataBase.Types.AutoStatus:
-                                        fixed (void* numPtr = &mass[SPos])
-                                        { Values[k] = (*(bool*)numPtr ? DataBase.AutoStatus.Used : DataBase.AutoStatus.UnUse); }
-                                        SPos += sizeof(bool);
-                                        CheckRowDataLength += sizeof(bool);
-                                        CheckRowsDataLength += sizeof(bool);
-                                        break;
-                                    case DataBase.Types.Byte:
-                                        Values[k] = mass[SPos];
-                                        SPos += sizeof(byte);
-                                        CheckRowDataLength += sizeof(byte);
-                                        CheckRowsDataLength += sizeof(byte);
-                                        break;
-                                    case DataBase.Types.DateTime:
-                                        fixed (void* numPtr = &mass[SPos])
-                                        { Values[k] = new DateTime(*(long*)numPtr); }
-                                        SPos += sizeof(long);
-                                        CheckRowDataLength += sizeof(long);
-                                        CheckRowsDataLength += sizeof(long);
-                                        break;
-                                    case DataBase.Types.Double:
-                                        fixed (void* numPtr = &mass[SPos])
-                                        { Values[k] = *(double*)numPtr; }
-                                        SPos += sizeof(double);
-                                        CheckRowDataLength += sizeof(double);
-                                        CheckRowsDataLength += sizeof(double);
-                                        break;
-                                    case DataBase.Types.Decimal:
-                                        fixed (void* numPtr = &mass[SPos])
-                                        { Values[k] = *(decimal*)numPtr; }
-                                        SPos += sizeof(decimal);
-                                        CheckRowDataLength += sizeof(decimal);
-                                        CheckRowsDataLength += sizeof(decimal);
-                                        break;
-                                    case DataBase.Types.Int64:
-                                        fixed (void* numPtr = &mass[SPos])
-                                        { Values[k] = *(long*)numPtr; }
-                                        SPos += sizeof(long);
-                                        CheckRowDataLength += sizeof(long);
-                                        CheckRowsDataLength += sizeof(long);
-                                        break;
-                                    case DataBase.Types.Int32:
-                                        fixed (void* numPtr = &mass[SPos])
-                                        { Values[k] = *(int*)numPtr; }
-                                        SPos += sizeof(int);
-                                        CheckRowDataLength += sizeof(int);
-                                        CheckRowsDataLength += sizeof(int);
-                                        break;
-                                    case DataBase.Types.RIU32:
-                                        fixed (void* numPtr = &mass[SPos])
-                                        { Values[k] = new RIU32(*(uint*)numPtr); }
-                                        SPos += sizeof(uint);
-                                        CheckRowDataLength += sizeof(uint);
-                                        CheckRowsDataLength += sizeof(uint);
-                                        break;
-                                    case DataBase.Types.String://тут надо бдительничать!
-                                        int StrLength;
-                                        fixed (void* numPtr = &mass[SPos])
-                                        { StrLength = *(int*)numPtr; }
-                                        SPos += sizeof(int);
-                                        CheckRowDataLength += sizeof(int);
-                                        CheckRowsDataLength += sizeof(int);
-
-                                        Values[k] = Encoding.UTF32.GetString(mass, SPos, StrLength);
-                                        SPos += StrLength;
-                                        CheckRowDataLength += StrLength;
-                                        CheckRowsDataLength += StrLength;
-                                        break;
-                                    default: throw new Exception("не поддерживаемый тип");
-                                }
-                                ColumnIndex++;
-                            }
-                        }
-
-                        if (CheckRowDataLength != RowDataLength)
-                        { return "Сообщение повреждено: " + Tables[i].Table.Name + ' ' + (j + 1).ToString() + "-" + ID.ToString() + " CheckRowDataLength != RowDataLength(" + CheckRowDataLength.ToString() + "!=" + RowDataLength.ToString() + ")"; }
-                    }
-
-                    if (CheckRowsDataLength != RowsDataLength)
-                    { return "Сообщение повреждено: " + Tables[i].Table.Name + " CheckRowsDataLength != RowsDataLength(" + CheckRowsDataLength.ToString() + "!=" + RowsDataLength.ToString() + ")"; }
                 }
 
                 return null;
             }
-            else
+        }
+
+        private RSACryptoServiceProvider GetRSA(uint userID)
+        {
+            var rsa = new RSACryptoServiceProvider();
+
+            var uk = GetUserKey(userID);
+
+            if (uk.EncodeKey == null)
+            { throw new Exception("Обновление не может быть сформировано, т.к. шифрующий код не задан."); }
+
             {
-                CheckSPoolExist = false;
-                UserID = 0;
-                SynchDT = new DateTime();
-                Tables = null;
-                return "Не удалось декодировать сообщение";
+                var k = ((DataBase.table)T.User).EncodeType.GetString(uk.DecodeKey);
+
+                rsa.FromXmlString(k);
             }
+
+            return rsa;
         }
 
         /// <summary>Получить шифрованное сообщение</summary>
@@ -1070,15 +617,15 @@ namespace LaboratoryOnlineJournal
         /// <returns></returns>
         public unsafe string ShowCrypted(byte[] mass, uint ForceUserID = 0)
         {
-            Table_class[] Tables;
+            DeserializeResult Tables;
             uint UserID;
             DateTime DT;
             bool SPoolExisted;
-            var Returned = this.GetValues(ForceUserID, mass, out Tables, out UserID, out DT, out SPoolExisted, false);
+            var Returned = this.GetValues(ForceUserID, mass, out Tables, out SPoolExisted, false);
 
             if (Returned == null)
             {
-                new Tables_Form(Tables, UserID, DT).ShowDialog();
+                new Tables_Form(Tables).ShowDialog();
                 return null;
             }
             else
