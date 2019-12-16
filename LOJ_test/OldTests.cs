@@ -12,12 +12,12 @@ using System.Reflection;
 using System.IO;
 using LaboratoryOnlineJournal;
 using LaboratoryOnlineJournal.Synch;
-using LaboratoryOnlineJournal.Serializer;
+using LaboratoryOnlineJournal.SerializeProvider;
 
 namespace LOJ_test
 {
     [TestClass]
-    public class UnitTest
+    public class OldTest
     {
         private static DataBase DataBase;
 
@@ -26,7 +26,7 @@ namespace LOJ_test
         {
             Misc.CheckTablesExist = false;
 
-            DataBase = new DataBase("loj", Encoding.GetEncoding(866));
+            DataBase = new DataBase("TestData\\loj", Encoding.GetEncoding(866));
 
             DataBase.UseMFT(".");
 

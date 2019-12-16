@@ -11,7 +11,7 @@ using System.Security.Authentication;
 using System.Runtime.InteropServices;
 using System.Reflection;
 using System.Threading;
-using LaboratoryOnlineJournal.Serializer;
+using LaboratoryOnlineJournal.SerializeProvider;
 using LaboratoryOnlineJournal.SerializeFormatProvider;
 
 namespace LaboratoryOnlineJournal
@@ -490,11 +490,11 @@ namespace LaboratoryOnlineJournal
 
         class LoadSPool_class : Progress_Form.AObject
         {
-            public LoadSPool_class(Serializer.DeserializeResult Tables) :
+            public LoadSPool_class(DeserializeResult Tables) :
                 base(false)
             { this.Tables = Tables; }
 
-            Serializer.DeserializeResult Tables;
+            DeserializeResult Tables;
             public string Returning = null;
 
             protected override bool Do()

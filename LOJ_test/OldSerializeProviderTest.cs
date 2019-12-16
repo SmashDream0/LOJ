@@ -1,5 +1,5 @@
 ﻿using LaboratoryOnlineJournal;
-using LaboratoryOnlineJournal.Serializer;
+using LaboratoryOnlineJournal.SerializeProvider;
 using LaboratoryOnlineJournal.Synch;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
@@ -20,7 +20,7 @@ namespace LOJ_test
         {
             Misc.CheckTablesExist = false;
 
-            DataBase = new DataBase("loj", Encoding.GetEncoding(866));
+            DataBase = new DataBase("TestData\\loj", Encoding.GetEncoding(866));
 
             DataBase.UseMFT(".");
 

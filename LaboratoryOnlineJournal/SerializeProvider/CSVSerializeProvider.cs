@@ -7,7 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace LaboratoryOnlineJournal.Serializer
+namespace LaboratoryOnlineJournal.SerializeProvider
 {
     public class CSVSerializeProvider : CSVFormatChecker, ISerializeProvider
     {

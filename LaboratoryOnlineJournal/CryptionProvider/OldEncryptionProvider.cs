@@ -5,11 +5,11 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace LaboratoryOnlineJournal.Cryption
+namespace LaboratoryOnlineJournal.CryptionProvider
 {
-    public class OldEncryption : ICryption
+    public class OldEncryptionProvider : ICryptionProvider
     {
-        public OldEncryption()
+        public OldEncryptionProvider()
         { }
 
         private struct crypt_struct
@@ -65,16 +65,6 @@ namespace LaboratoryOnlineJournal.Cryption
             public string pass { get { return Encoding.UTF32.GetString(mass); } }
         }
 
-        private static string ByteString(byte[] array)
-        {
-            var sb = new StringBuilder();
-
-            for (int i = 0; i < array.Length; i++)
-            { sb.Append(array[i]).Append(','); }
-
-            return sb.ToString();
-        }
-
         /// <summary>Расшифровать массив</summary>
         /// <param name="result">Массив шифрации</param>
         /// <returns></returns>
@@ -107,8 +97,6 @@ namespace LaboratoryOnlineJournal.Cryption
 
                 fixed (void* numPtr = &result[4])
                 { m2ln = *(int*)numPtr; }
-
-                var tmp = ByteString(tmass);
 
                 urbytes = new crypt_struct(rsa.Decrypt(tmass, true));    //дешифрованный шифр   //тут все правильно!
             }
@@ -167,11 +155,7 @@ namespace LaboratoryOnlineJournal.Cryption
             int enckeyLength;
 
             {
-                var tmp = ByteString(urbytes.mass);
-
                 var enckey = rsa.Encrypt(urbytes.mass, true); //шифрованый шифр
-
-                tmp = ByteString(enckey);
 
                 enckeyLength = enckey.Length;   //длина шифрованного пароля
 

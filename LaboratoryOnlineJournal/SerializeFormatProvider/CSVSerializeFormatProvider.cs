@@ -1,6 +1,6 @@
-﻿using LaboratoryOnlineJournal.Cryption;
+﻿using LaboratoryOnlineJournal.CryptionProvider;
 using LaboratoryOnlineJournal.FormatChecker;
-using LaboratoryOnlineJournal.Serializer;
+using LaboratoryOnlineJournal.SerializeProvider;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,7 +13,7 @@ namespace LaboratoryOnlineJournal.SerializeFormatProvider
     public class CSVSerializeFormatProvider : SerializeFormatProvider
     {
         public CSVSerializeFormatProvider(Encoding encoding, DataBase dataBase)
-            : base("CSV", new CSVFormatChecker(encoding), new CSVSerializeProvider(encoding, dataBase), new BlankEncryption())
+            : base("CSV", new CSVFormatChecker(encoding), new CSVSerializeProvider(encoding, dataBase), new BlankEncryptionProvider())
         { }
     }
 }

@@ -5,9 +5,9 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace LaboratoryOnlineJournal.Cryption
+namespace LaboratoryOnlineJournal.CryptionProvider
 {
-    public class BlankEncryption : ICryption
+    public class BlankEncryptionProvider : ICryptionProvider
     {
         public byte[] Decode(byte[] mass, Func<uint, RSACryptoServiceProvider> getRSA)
         {

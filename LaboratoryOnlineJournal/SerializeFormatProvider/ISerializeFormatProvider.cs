@@ -1,4 +1,4 @@
-﻿using LaboratoryOnlineJournal.Serializer;
+﻿using LaboratoryOnlineJournal.SerializeProvider;
 using System;
 using System.Collections.Generic;
 using System.Linq;

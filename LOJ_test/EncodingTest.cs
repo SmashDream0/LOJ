@@ -1,4 +1,4 @@
-﻿using LaboratoryOnlineJournal.Cryption;
+﻿using LaboratoryOnlineJournal.CryptionProvider;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
@@ -15,7 +15,7 @@ namespace LOJ_test
         [TestMethod]
         public void OldTest()
         {
-            var encoder = new OldEncryption();
+            var encoder = new OldEncryptionProvider();
 
             var bytes = new byte[] { 1, 3, 57, 6, 45, 23, 2, 6, 37, 65, 87, 4, 56, 4, 35, 56, 8, 255 };
 
@@ -34,7 +34,7 @@ namespace LOJ_test
         [TestMethod]
         public void BlankTest()
         {
-            var encoder = new BlankEncryption();
+            var encoder = new BlankEncryptionProvider();
 
             var bytes = new byte[] { 1, 3, 57, 6, 45, 23, 2, 6, 37, 65, 87, 4, 56, 4, 35, 56, 8, 255 };
 

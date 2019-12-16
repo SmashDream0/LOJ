@@ -5,7 +5,7 @@
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProjectGuid>{7313A37E-23E0-441E-B9E4-7CDD59E8D9CD}</ProjectGuid>
-    <OutputType>Exe</OutputType>
+    <OutputType>WinExe</OutputType>
     <RootNamespace>LaboratoryOnlineJournal</RootNamespace>
     <AssemblyName>LaboratoryOnlineJournal</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
@@ -49,6 +49,9 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <Prefer32Bit>false</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup>
+    <StartupObject />
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="AutoTable, Version=1.6.7153.19874, Culture=neutral, processorArchitecture=MSIL">
@@ -127,9 +130,9 @@
     <Compile Include="ByteWork\base.cs" />
     <Compile Include="ByteWork\ByteIO.cs" />
     <Compile Include="ByteWork\ByteReader.cs" />
-    <Compile Include="Cryption\BlankEncryption.cs" />
-    <Compile Include="Cryption\ICryption.cs" />
-    <Compile Include="Cryption\OldEncryption.cs" />
+    <Compile Include="CryptionProvider\BlankEncryptionProvider.cs" />
+    <Compile Include="CryptionProvider\ICryptionProvider.cs" />
+    <Compile Include="CryptionProvider\OldEncryptionProvider.cs" />
     <Compile Include="Employe\ChangePeriod_Form.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -258,12 +261,12 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
-    <Compile Include="SerializerFrovider\CSVSerializeProvider.cs" />
-    <Compile Include="SerializerFrovider\DeserializeResult.cs" />
-    <Compile Include="SerializerFrovider\ISerializeProvider.cs" />
-    <Compile Include="SerializerFrovider\OldByteSerializeProvider.cs" />
-    <Compile Include="SerializerFrovider\Row.cs" />
-    <Compile Include="SerializerFrovider\Table.cs" />
+    <Compile Include="SerializeProvider\CSVSerializeProvider.cs" />
+    <Compile Include="SerializeProvider\DeserializeResult.cs" />
+    <Compile Include="SerializeProvider\ISerializeProvider.cs" />
+    <Compile Include="SerializeProvider\OldByteSerializeProvider.cs" />
+    <Compile Include="SerializeProvider\Row.cs" />
+    <Compile Include="SerializeProvider\Table.cs" />
     <Compile Include="Startup\Mail_Form.cs">
       <SubType>Form</SubType>
     </Compile>

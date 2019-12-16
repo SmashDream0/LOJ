@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace LaboratoryOnlineJournal.Serializer
+namespace LaboratoryOnlineJournal.SerializeProvider
 {
     public class OldByteSerializeProvider : OldFormatChecker, ISerializeProvider
     {

@@ -1,17 +1,19 @@
 ﻿using LaboratoryOnlineJournal;
+using LaboratoryOnlineJournal.SerializeFormatProvider;
 using LaboratoryOnlineJournal.SerializeProvider;
 using LaboratoryOnlineJournal.Synch;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace LOJ_test
 {
     [TestClass]
-    public class CSVSerializeProviderTest
+    public class OldFormatProviderTest
     {
         private static DataBase DataBase;
 
@@ -20,7 +22,7 @@ namespace LOJ_test
         {
             Misc.CheckTablesExist = false;
 
-            DataBase = new DataBase("loj", Encoding.GetEncoding(866));
+            DataBase = new DataBase("TestData\\loj", Encoding.GetEncoding(866));
 
             DataBase.UseMFT(".");
 
@@ -98,66 +100,43 @@ namespace LOJ_test
             return result;
         }
 
-        private void CheckTables(IEnumerable<DataBase.ISTable> sTables, DeserializeResult deserializeResult)
+        private RSACryptoServiceProvider GetRsa(uint userID)
         {
-            Assert.AreEqual(sTables.Count(), deserializeResult.Tables.Count());
+            var rsa = new RSACryptoServiceProvider();
 
-            var compares = Enumerable.Zip(deserializeResult.Tables, sTables, (x1, x2) => new { DTable = x1, STable = x2 });
+            var ck = TestData.ClosedKeys.Users[userID];
 
-            foreach (var compare in compares)
-            {
-                var rows = compare.DTable.Rows.ToArray();
+            rsa.FromXmlString(ck);
 
-                for (int i = 0; i < compare.STable.Rows.Count; i++)
-                {
-                    for (int j = 0; j < compare.STable.Parent.Columns.Count - 1; j++)
-                    {
-                        var column = compare.STable.Parent.GetColumn(j);
-
-                        if (!column.Protect)
-                        {
-                            var row = compare.STable.Rows.Get_Row(i);
-
-                            var rowValue = rows[i].Values[j];
-                            var tableValue = compare.STable.Parent.Rows.GetObject_UnShow(row.ID, j);
-
-                            if (rowValue != null && rowValue.GetType() == typeof(RIU32))
-                            {
-                                rowValue = (uint)(RIU32)rowValue;
-                            }
-
-                            try
-                            {
-                                Assert.AreEqual(rowValue, tableValue);
-                            }
-                            catch (Exception ex)
-                            {
-                                throw ex;
-                            }
-                        }
-                    }
-                }
-            }
+            return rsa;
         }
 
-        /// <summary>
-        /// Проверяю
-        /// </summary>
         [TestMethod]
-        public void SerializerTest()
+        public void OldFormatProviderFilesCheck()
         {
-            var csvSerializerProvider = new CSVSerializeProvider(Encoding.UTF32, DataBase);
+            var files = System.IO.Directory.GetFiles("TestData\\TestFiles");
 
-            var tables = GetSTables();
+            var oldSerializerFormatProvider = new OldSerializeFormatProvider(Encoding.UTF32, DataBase);
 
-            var date = new DateTime(2019, 12, 11);
-            uint userID = 5;
+            Assert.IsTrue(files.Any(), "there are no test files");
 
-            var bytes = csvSerializerProvider.Serialize(tables, date, userID);
+            foreach (var file in files)
+            {
+                var fileInfo = new System.IO.FileInfo(file);
 
-            var result = csvSerializerProvider.Deserialize(bytes);
+                var bytes = new Byte[fileInfo.Length];
 
-            CheckTables(tables, result);
+                using (var stream = fileInfo.OpenRead())
+                { stream.Read(bytes, 0, bytes.Length); }
+
+                DeserializeResult deserializeResult;
+
+                var result = oldSerializerFormatProvider.TryDecodeData(GetRsa, bytes, out deserializeResult);
+
+                Assert.IsTrue(result);
+
+                //var resultBytes = oldSerializerFormatProvider.
+            }
         }
     }
 }

@@ -13,7 +13,7 @@ using NPOI.HSSF.UserModel;
 //using NPOI.HPSF;
 using NPOI.POIFS.FileSystem;
 using NPOI.SS.Util;
-using LaboratoryOnlineJournal.Serializer;
+using LaboratoryOnlineJournal.SerializeProvider;
 using LaboratoryOnlineJournal.SerializeFormatProvider;
 
 namespace LaboratoryOnlineJournal

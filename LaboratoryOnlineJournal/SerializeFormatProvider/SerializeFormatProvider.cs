@@ -1,6 +1,6 @@
-﻿using LaboratoryOnlineJournal.Cryption;
+﻿using LaboratoryOnlineJournal.CryptionProvider;
 using LaboratoryOnlineJournal.FormatChecker;
-using LaboratoryOnlineJournal.Serializer;
+using LaboratoryOnlineJournal.SerializeProvider;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,7 +12,7 @@ namespace LaboratoryOnlineJournal.SerializeFormatProvider
 {
     public abstract class SerializeFormatProvider: ISerializeFormatProvider
     {
-        public SerializeFormatProvider(String name, IFormatChecker formatChecker, ISerializeProvider serializeProvider, ICryption cryption)
+        public SerializeFormatProvider(String name, IFormatChecker formatChecker, ISerializeProvider serializeProvider, ICryptionProvider cryption)
         {
             Name = name;
             _formatChecker = formatChecker;
@@ -23,7 +23,7 @@ namespace LaboratoryOnlineJournal.SerializeFormatProvider
         public String Name { get; private set; }
         private readonly IFormatChecker _formatChecker;
         private readonly ISerializeProvider _serializeProvider;
-        private readonly ICryption _cryption;
+        private readonly ICryptionProvider _cryption;
 
         public bool TryDecodeData(Func<uint, RSACryptoServiceProvider> getRSA, byte[] bytes, out DeserializeResult deserializeResult)
         {
