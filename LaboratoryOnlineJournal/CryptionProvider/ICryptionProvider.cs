@@ -9,7 +9,9 @@ namespace LaboratoryOnlineJournal.CryptionProvider
 {
     public interface ICryptionProvider
     {
-        byte[] Decode(byte[] mass, Func<uint, RSACryptoServiceProvider> getRSA);
+        byte[] Decode(byte[] mass, GetRsaDelegate getRSA);
         byte[] Encode(byte[] mass, RSACryptoServiceProvider rsa);
     }
+
+    public delegate bool GetRsaDelegate(uint id, out RSACryptoServiceProvider rsa);
 }

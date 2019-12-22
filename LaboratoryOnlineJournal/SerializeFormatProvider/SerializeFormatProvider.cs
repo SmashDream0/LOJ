@@ -25,14 +25,14 @@ namespace LaboratoryOnlineJournal.SerializeFormatProvider
         private readonly ISerializeProvider _serializeProvider;
         private readonly ICryptionProvider _cryption;
 
-        public bool TryDecodeData(Func<uint, RSACryptoServiceProvider> getRSA, byte[] bytes, out DeserializeResult deserializeResult)
+        public bool TryDecodeData(GetRsaDelegate getRSA, byte[] bytes, out DeserializeResult deserializeResult)
         {
             var result = false;
             deserializeResult = null;
 
             var decodedBytes = _cryption.Decode(bytes, getRSA);
 
-            if (_formatChecker.Check(decodedBytes))
+            if (decodedBytes != null && _formatChecker.Check(decodedBytes))
             {
                 deserializeResult = _serializeProvider.Deserialize(decodedBytes);
                 result = true;

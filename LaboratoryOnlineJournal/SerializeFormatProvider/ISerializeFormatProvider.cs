@@ -1,4 +1,5 @@
-﻿using LaboratoryOnlineJournal.SerializeProvider;
+﻿using LaboratoryOnlineJournal.CryptionProvider;
+using LaboratoryOnlineJournal.SerializeProvider;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,7 +12,7 @@ namespace LaboratoryOnlineJournal.SerializeFormatProvider
     public interface ISerializeFormatProvider
     {
         String Name { get; }
-        bool TryDecodeData(Func<uint, RSACryptoServiceProvider> getRSA, byte[] bytes, out DeserializeResult deserializeResult);
+        bool TryDecodeData(GetRsaDelegate getRSA, byte[] bytes, out DeserializeResult deserializeResult);
         byte[] EncodeData(RSACryptoServiceProvider rsa, IEnumerable<DataBase.ISTable> tables, DateTime date, uint userID);
     }
 }

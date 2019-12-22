@@ -19,9 +19,27 @@ namespace LaboratoryOnlineJournal
     {
         #region ДБ_Форм тут наверное забиваются настройки, почитать и разобраться
 
-        public DB_Form(bool AdminShowSettings = false)
+        public DB_Form(Synch.SynchPoolManager synchPoolManager, bool AdminShowSettings = false)
         {
             InitializeComponent();
+
+            _synchPoolManager = synchPoolManager;
+
+            _uTables = _synchPoolManager.UTables.ToArray();
+
+            {
+                var User = T.User.CreateSubTable(false);
+
+                User.QUERRY().SHOW.DO();
+
+                this.Users = new uint[User.Rows.Count];
+
+                for (int i = 0; i < Users.Length; i++)
+                {
+                    Users[i] = User.Rows.GetID(i);
+                    ForceUser_combo.Items.Add(User.Rows.Get<string>(i, C.User.Login));
+                }
+            }
 
             UpdatePeriod_Box.Text = UpdatePeriod.ToString();
 
@@ -45,27 +63,16 @@ namespace LaboratoryOnlineJournal
 
             UTable_Grid.Columns.Add(column);
 
-            UTable_Grid.RowCount = data.SynchPool.UCount;
-
-            var User = T.User.CreateSubTable(false);
-
-            User.QUERRY().SHOW.DO();
-
-            this.Users = new uint[User.Rows.Count];
-
-            for (int i = 0; i < Users.Length; i++)
-            { 
-                Users[i] = User.Rows.GetID(i);
-                ForceUser_combo.Items.Add(User.Rows.Get<string>(i, C.User.Login));
-            }
+            UTable_Grid.RowCount = _uTables.Length;
 
             PodrCode_label.Text += GetImportName(data.UserID);
         }
 
         #endregion
 
-        uint[] Users;
-
+        private uint[] Users;
+        private readonly Synch.SynchPoolManager _synchPoolManager;
+        private Synch.UTable[] _uTables;
 
         enum EUTable : byte { Number, Name, Increment, Use }
 
@@ -83,21 +90,8 @@ namespace LaboratoryOnlineJournal
         {
             public SendUpdate_class(byte[] Message)
                 : base(true)
-            {
-                Smtp = new SmtpClient(data.PrgSettings.Values[(int)data.Strings.DirectSMTPAdress].String
-                                           , data.PrgSettings.Values[(int)data.Strings.DirectSMTPPort].Int);   //для всех 578, для гугла, яндекса и местной почты 25, еще есть 465
+            { this.Message = Message; }
 
-                Smtp.EnableSsl = data.PrgSettings.Values[(int)data.Strings.DirectSMTPCrypt].Bool;
-
-                Smtp.Credentials = new NetworkCredential(data.PrgSettings.Values[(int)data.Strings.DirectMailLogin].String,
-                                                         data.PrgSettings.Values[(int)data.Strings.DirectMailPass].String);
-
-                Smtp.DeliveryMethod = SmtpDeliveryMethod.Network;
-
-                this.Message = Message;
-            }
-
-            readonly SmtpClient Smtp;
             byte[] Message;
 
             protected override bool Do()
@@ -188,6 +182,15 @@ namespace LaboratoryOnlineJournal
 
                 try
                 {
+                    var smtp = new SmtpClient();   //для всех 578, для гугла, яндекса и местной почты 25, еще есть 465
+
+                    smtp.Host = data.PrgSettings.Values[(int)data.Strings.DirectSMTPAdress].String;
+                    smtp.Port = data.PrgSettings.Values[(int)data.Strings.DirectSMTPPort].Int;
+                    smtp.EnableSsl = data.PrgSettings.Values[(int)data.Strings.DirectSMTPCrypt].Bool;
+                    smtp.Credentials = new NetworkCredential(data.PrgSettings.Values[(int)data.Strings.DirectMailLogin].String,
+                                                             data.PrgSettings.Values[(int)data.Strings.DirectMailPass].String);
+                    smtp.DeliveryMethod = SmtpDeliveryMethod.Network;
+
                     for (int i = 0; i < Sendings.Count; i++)
                     {
                         using (var Attach = new System.Net.Mail.Attachment(new FileStream(Application.StartupPath + "\\отосланные\\" + FileName, FileMode.Open), ct))
@@ -202,7 +205,7 @@ namespace LaboratoryOnlineJournal
                             NewMessage.Subject = data.EmaleSubject + ' ' + Sendings[i];
 
                             NewMessage.Attachments.Add(Attach);
-                            Smtp.Send(NewMessage);
+                            smtp.Send(NewMessage);
                         }
                     }
                 }
@@ -313,7 +316,7 @@ namespace LaboratoryOnlineJournal
 
             int YMTo;
 
-            data.SynchPool.GetDiapPeriods(out YMStart, out YMTo);
+            _synchPoolManager.GetDiapPeriods(out YMStart, out YMTo);
 
             for (int i = YMStart; i <= YMTo; i++)
             {
@@ -321,7 +324,7 @@ namespace LaboratoryOnlineJournal
                 Period_combo.Items.Add(ATMisc.GetMonthName1(DT.Month) + ' ' + DT.Year.ToString());
             }
 
-            int YM = ATMisc.GetYMFromDateTime(T.SPool.Rows.Get<DateTime>(data.SynchPool.LastPoolID, C.SPool.Date));
+            int YM = ATMisc.GetYMFromDateTime(T.SPool.Rows.Get<DateTime>(_synchPoolManager.LastPoolID, C.SPool.Date));
 
             if (Period_combo.SelectedIndex == YM - YMStart)
             { Period_combo_SelectedIndexChanged(null, null); }
@@ -333,15 +336,15 @@ namespace LaboratoryOnlineJournal
         {
             Synch_combo.Items.Clear();
 
-            SPIDs = data.SynchPool.GetSynches(Period_combo.SelectedIndex + YMStart);
+            SPIDs = _synchPoolManager.GetSynches(Period_combo.SelectedIndex + YMStart);
 
             for (int i = 0; i < SPIDs.Length; i++)
             {
                 string HeaderText;
                 if (T.SPool.Rows.Get<bool>(SPIDs[i], C.SPool.Local))
-                { HeaderText = (SPIDs[i] == data.SynchPool.LastPoolID ? "CL- " : "L - "); }
+                { HeaderText = (SPIDs[i] == _synchPoolManager.LastPoolID ? "CL- " : "L - "); }
                 else
-                { HeaderText = (SPIDs[i] == data.SynchPool.LastPoolID ? "ERR-" : "R - "); }
+                { HeaderText = (SPIDs[i] == _synchPoolManager.LastPoolID ? "ERR-" : "R - "); }
 
                 Synch_combo.Items.Add(SPIDs[i].ToString() + HeaderText + T.SPool.Rows.Get<DateTime>(SPIDs[i], C.SPool.Date).ToString("dd.MM.yyyy hh.mm.ss") + ' ' + T.SPool.Rows.Get<string>(SPIDs[i], C.SPool.SUser, C.User.Login));
             }
@@ -350,7 +353,7 @@ namespace LaboratoryOnlineJournal
             {
                 for (int i = 0; i < SPIDs.Length; i++)
                 {
-                    if (SPIDs[i] == data.SynchPool.LastPoolID)
+                    if (SPIDs[i] == _synchPoolManager.LastPoolID)
                     {
                         Synch_combo.SelectedIndex = i;
                         goto FindedID;
@@ -364,7 +367,7 @@ namespace LaboratoryOnlineJournal
             UpdateView();
         }
 
-        void UpdateView()
+        private void UpdateView()
         {
             var sb = new StringBuilder();
 
@@ -372,14 +375,14 @@ namespace LaboratoryOnlineJournal
             {
                 var spid = SPIDs[Synch_combo.SelectedIndex];
 
-                for (int i = 0; i < data.SynchPool.UCount; i++)
+                foreach(var uTable in _uTables)
                 {
-                    if (data.SynchPool.GetUTableUse(i))
+                    if (uTable.Use)
                     {
-                        var Count = (int)data.SynchPool.GetUTable(i).QUERRY(DataBase.State.None).COUNT.WHERE.C(data.SynchPool.GetUTable(i).Parent.Columns.Count - 1, spid).DO()[0].Value;
+                        var Count = (int)uTable.Table.QUERRY(DataBase.State.None).COUNT.WHERE.C(uTable.Table.Parent.Columns.Count - 1, spid).DO()[0].Value;
 
                         if (Count > 0)
-                        { sb.Append(data.SynchPool.GetUTable(i).Parent.AlterName + "(" + Count.ToString() + "), "); }
+                        { sb.Append(uTable.Table.Parent.AlterName + "(" + Count.ToString() + "), "); }
                     }
                 }
             }
@@ -408,7 +411,7 @@ namespace LaboratoryOnlineJournal
 
         private void SaveUpdate_button_Click(object sender, EventArgs e)
         {
-            var bts = data.SynchPool.GetEncrypted(SPIDs[Synch_combo.SelectedIndex]);
+            var bts = _synchPoolManager.GetEncrypted(SPIDs[Synch_combo.SelectedIndex]);
 
             if (bts == null)
             {
@@ -429,8 +432,8 @@ namespace LaboratoryOnlineJournal
                 using (var fs = new FileStream(SFD.FileName, FileMode.Create, FileAccess.Write))
                 { fs.Write(bts, 0, bts.Length); }
 
-                if (SPIDs[Synch_combo.SelectedIndex] == data.SynchPool.LastPoolID)
-                { data.SynchPool.AddNewSynch(); }
+                if (SPIDs[Synch_combo.SelectedIndex] == _synchPoolManager.LastPoolID)
+                { _synchPoolManager.AddNewSynch(); }
 
                 System.Diagnostics.Process.Start("explorer.exe", @"/select, " + SFD.FileName);
             }
@@ -457,7 +460,7 @@ namespace LaboratoryOnlineJournal
                 fs.Read(bts, 0, bts.Length);
             }
 
-            var msg = data.SynchPool.LoadCrypted(bts, true, (ForceUser_combo.SelectedIndex > -1 ? Users[ForceUser_combo.SelectedIndex] : 0), ForceLoad_check.Checked);
+            var msg = _synchPoolManager.LoadCrypted(bts, true, (ForceUser_combo.SelectedIndex > -1 ? Users[ForceUser_combo.SelectedIndex] : 0), ForceLoad_check.Checked);
             if (msg != null)
             { MessageBox.Show(this, "Произвести загрузку не удалось:\n" + msg, "Внимание", MessageBoxButtons.OK, MessageBoxIcon.Exclamation); }
             else
@@ -551,16 +554,16 @@ namespace LaboratoryOnlineJournal
 
         private void SendMessage_button_Click(object sender, EventArgs e)
         {
-            var Message = data.SynchPool.GetEncrypted(SPIDs[Synch_combo.SelectedIndex]);
+            var Message = _synchPoolManager.GetEncrypted(SPIDs[Synch_combo.SelectedIndex]);
 
             if (Message == null)
             { MessageBox.Show(this, "Отправлять нечего", "Внимание", MessageBoxButtons.OK, MessageBoxIcon.Exclamation); }
             else if (new Progress_Form(new SendUpdate_class(Message)).ShowDialog() == System.Windows.Forms.DialogResult.OK)
             {
-                if (SPIDs[Synch_combo.SelectedIndex] == data.SynchPool.LastPoolID)
+                if (SPIDs[Synch_combo.SelectedIndex] == _synchPoolManager.LastPoolID)
                 {
                     data.IncremUserSendDate();
-                    data.SynchPool.AddNewSynch();
+                    _synchPoolManager.AddNewSynch();
                 }
 
                 LoadSynches();
@@ -573,7 +576,7 @@ namespace LaboratoryOnlineJournal
         private void UpdateBD_Form_FormClosed(object sender, FormClosedEventArgs e)
         {
             UpdatePeriod = Convert.ToInt32(UpdatePeriod_Box.Text);
-            data.SynchPool.Prepare();
+            _synchPoolManager.Prepare();
         }
 
         private void UpdatePeriod_Box_TextChanged(object sender, EventArgs e)
@@ -601,7 +604,7 @@ namespace LaboratoryOnlineJournal
         {
             if (MessageBox.Show(this, "Если создать новую точку синхронизации, тогда предыдущая синхронизация будет выведена из эксплуатации и все последующие изменения данных будут записываться на счет новой синхронизации.\r\nВы уверены, что хотите создать новую точку синхронизации?", "Вопрос", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == System.Windows.Forms.DialogResult.Yes)
             {
-                data.SynchPool.AddNewSynch();
+                _synchPoolManager.AddNewSynch();
                 SelectCurrentSPool();
             }
         }
@@ -644,7 +647,7 @@ namespace LaboratoryOnlineJournal
             }
             try
             {
-                var msg = data.SynchPool.ShowCrypted(bts, (ForceUser_combo.SelectedIndex > -1 ? Users[ForceUser_combo.SelectedIndex] : 0));
+                var msg = _synchPoolManager.ShowCrypted(bts, (ForceUser_combo.SelectedIndex > -1 ? Users[ForceUser_combo.SelectedIndex] : 0));
 
                 if (msg != null)
                 { MessageBox.Show(this, "Произвести обзор не удалось:\n" + msg, "Внимание", MessageBoxButtons.OK, MessageBoxIcon.Exclamation); }
@@ -736,8 +739,8 @@ namespace LaboratoryOnlineJournal
 
         private void ShowSelection_button_Click(object sender, EventArgs e)
         {
-            var bts = data.SynchPool.GetEncrypted(SPIDs[Synch_combo.SelectedIndex]);
-            var msg = data.SynchPool.ShowCrypted(bts, (ForceUser_combo.SelectedIndex > -1 ? Users[ForceUser_combo.SelectedIndex] : 0));
+            var bts = _synchPoolManager.GetEncrypted(SPIDs[Synch_combo.SelectedIndex]);
+            var msg = _synchPoolManager.ShowCrypted(bts, (ForceUser_combo.SelectedIndex > -1 ? Users[ForceUser_combo.SelectedIndex] : 0));
 
             if (msg != null)
             { MessageBox.Show(msg, "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error); }
@@ -760,13 +763,13 @@ namespace LaboratoryOnlineJournal
                 switch ((EUTable)e.ColumnIndex)
                 {
                     case EUTable.Name:
-                        e.Value = data.SynchPool.GetUTable(e.RowIndex).Parent.Name;
+                        e.Value = _uTables[e.RowIndex].Table.Parent.Name;
                         break;
                     case EUTable.Use:
-                        e.Value = data.SynchPool.GetUTableUse(e.RowIndex);
+                        e.Value = _uTables[e.RowIndex].Use;
                         break;
                     case EUTable.Increment:
-                        e.Value = data.SynchPool.GetUTable(e.RowIndex).Parent.DataSource.Increment;
+                        e.Value = _uTables[e.RowIndex].Table.Parent.DataSource.Increment;
                         break;
                     case EUTable.Number:
                         e.Value = (e.RowIndex + 1);
@@ -795,7 +798,7 @@ namespace LaboratoryOnlineJournal
                 switch ((EUTable)e.ColumnIndex)
                 {
                     case EUTable.Use:
-                        data.SynchPool.SetUTableUse(e.RowIndex, (bool)e.Value);
+                        _uTables[e.RowIndex].Use = (bool)e.Value;
                         
                         UpdateView();
 

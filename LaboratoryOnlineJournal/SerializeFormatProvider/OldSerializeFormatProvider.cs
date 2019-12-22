@@ -12,8 +12,8 @@ namespace LaboratoryOnlineJournal.SerializeFormatProvider
 {
     public class OldSerializeFormatProvider : SerializeFormatProvider
     {
-        public OldSerializeFormatProvider(Encoding encoding, DataBase dataBase)
-            : base("Old", new OldFormatChecker(encoding), new OldByteSerializeProvider(encoding, dataBase), new OldEncryptionProvider())
+        public OldSerializeFormatProvider(DataBase dataBase)
+            : base("Old", new OldFormatChecker(Encoding.UTF32), new OldByteSerializeProvider(Encoding.UTF32, dataBase), new OldEncryptionProvider())
         { }
     }
 }

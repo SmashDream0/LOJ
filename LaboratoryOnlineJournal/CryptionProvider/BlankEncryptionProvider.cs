@@ -9,7 +9,7 @@ namespace LaboratoryOnlineJournal.CryptionProvider
 {
     public class BlankEncryptionProvider : ICryptionProvider
     {
-        public byte[] Decode(byte[] mass, Func<uint, RSACryptoServiceProvider> getRSA)
+        public byte[] Decode(byte[] mass, GetRsaDelegate getRSA)
         {
             return mass;
         }

@@ -68,7 +68,7 @@ namespace LaboratoryOnlineJournal.CryptionProvider
         /// <summary>Расшифровать массив</summary>
         /// <param name="result">Массив шифрации</param>
         /// <returns></returns>
-        public unsafe byte[] Decode(byte[] mass, Func<uint, RSACryptoServiceProvider> getRSA)
+        public unsafe byte[] Decode(byte[] mass, GetRsaDelegate getRSA)
         {
             byte[] result = mass.Clone() as byte[];
 
@@ -76,7 +76,10 @@ namespace LaboratoryOnlineJournal.CryptionProvider
             fixed (void* numPtr = &result[result.Length - 4])
             { UserID = *(uint*)numPtr; }  //id пользователя
 
-            var rsa = getRSA(UserID);
+            RSACryptoServiceProvider rsa;
+
+            if (!getRSA(UserID, out rsa))
+            { return null; }
 
             crypt_struct urbytes, mrpass;
 

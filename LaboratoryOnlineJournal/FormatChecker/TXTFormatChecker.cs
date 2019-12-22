@@ -7,14 +7,14 @@ using System.Threading.Tasks;
 
 namespace LaboratoryOnlineJournal.FormatChecker
 {
-    public class CSVFormatChecker : IFormatChecker
+    public class TXTFormatChecker : IFormatChecker
     {
-        public CSVFormatChecker(Encoding encoding)
+        public TXTFormatChecker(Encoding encoding)
         { Encoding = encoding; }
 
         protected Encoding Encoding { get; private set; }
 
-        public String Mark = "It's unsecure CSV!";
+        public String Mark = "It's unsecure text!";
 
         public virtual bool Check(byte[] bytes)
         {

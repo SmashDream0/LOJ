@@ -151,10 +151,10 @@
     <Compile Include="Employe\LoadDBUpdates_Form.Designer.cs">
       <DependentUpon>LoadDBUpdates_Form.cs</DependentUpon>
     </Compile>
-    <Compile Include="FormatChecker\CSVFormatChecker.cs" />
+    <Compile Include="FormatChecker\TXTFormatChecker.cs" />
     <Compile Include="FormatChecker\IFormatChecker.cs" />
     <Compile Include="FormatChecker\OldFormatChecker.cs" />
-    <Compile Include="SerializeFormatProvider\CSVSerializeFormatProvider.cs" />
+    <Compile Include="SerializeFormatProvider\TXTSerializeFormatProvider.cs" />
     <Compile Include="SerializeFormatProvider\OldSerializeFormatProvider.cs" />
     <Compile Include="SerializeFormatProvider\SerializeFormatProvider.cs" />
     <Compile Include="SerializeFormatProvider\ISerializeFormatProvider.cs" />
@@ -241,7 +241,9 @@
     <Compile Include="misc\Loads\Main.cs" />
     <Compile Include="misc\Loads\Settings.cs" />
     <Compile Include="misc\Misc.cs" />
-    <Compile Include="misc\SynchPool.cs" />
+    <Compile Include="Synch\KeysContainer.cs" />
+    <Compile Include="Synch\LoadSPool.cs" />
+    <Compile Include="Synch\SynchPoolManager.cs" />
     <Compile Include="misc\Tables_Form.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -261,7 +263,7 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
-    <Compile Include="SerializeProvider\CSVSerializeProvider.cs" />
+    <Compile Include="SerializeProvider\TXTSerializeProvider.cs" />
     <Compile Include="SerializeProvider\DeserializeResult.cs" />
     <Compile Include="SerializeProvider\ISerializeProvider.cs" />
     <Compile Include="SerializeProvider\OldByteSerializeProvider.cs" />
@@ -298,7 +300,7 @@
       <DependentUpon>TimeLessPass_Form.cs</DependentUpon>
     </Compile>
     <Compile Include="Synch\SynchTable.cs" />
-    <Compile Include="Synch\SynchManager.cs" />
+    <Compile Include="Synch\UTable.cs" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="admin\AboutForm.resx">

@@ -172,7 +172,7 @@ namespace LaboratoryOnlineJournal
 
         private void DB_button_Click(object sender, EventArgs e)
         {
-            new DB_Form(true).ShowDialog();
+            new DB_Form(data.SynchPool, true).ShowDialog();
         }
 
         private void Period_Box_TextChanged(object sender, EventArgs e)

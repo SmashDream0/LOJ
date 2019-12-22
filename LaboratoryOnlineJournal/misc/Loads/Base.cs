@@ -15,6 +15,7 @@ using NPOI.POIFS.FileSystem;
 using NPOI.SS.Util;
 using LaboratoryOnlineJournal.SerializeProvider;
 using LaboratoryOnlineJournal.SerializeFormatProvider;
+using LaboratoryOnlineJournal.Synch;
 
 namespace LaboratoryOnlineJournal
 {
@@ -198,13 +199,13 @@ namespace LaboratoryOnlineJournal
             G.SPool = T.SPool.CreateSubTable(false);
 
             var serializeProviders = GetSerializeProviders(db);
-            data.SynchPool = new SynchPool_class(db, serializeProviders.Last().Name, serializeProviders);
+            data.SynchPool = new SynchPoolManager(db, serializeProviders.Last().Name, serializeProviders);
         }
 
         public static ISerializeFormatProvider[] GetSerializeProviders(DataBase dataBase)
         {
-            var oldProvider = new OldSerializeFormatProvider(Encoding.UTF32, dataBase);
-            var csvProvider = new CSVSerializeFormatProvider(Encoding.UTF32, dataBase);
+            var oldProvider = new OldSerializeFormatProvider(dataBase);
+            var csvProvider = new TXTSerializeFormatProvider(dataBase);
 
             return new ISerializeFormatProvider[] { oldProvider, csvProvider };
         }

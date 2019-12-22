@@ -12,6 +12,7 @@ using System.Runtime.InteropServices;
 using System.Reflection;
 using System.Threading;
 using LaboratoryOnlineJournal;
+using LaboratoryOnlineJournal.Synch;
 
 /// <summary>Общие объекты управления, настройки программы и база данных</summary>
 public static class data
@@ -46,7 +47,7 @@ public static class data
     public static float ForHidedP = 0.05f;
 
     public static DataBase T1;
-    public static SynchPool_class SynchPool;
+    public static SynchPoolManager SynchPool;
 
     static uint _UserID;
     public static uint UserID

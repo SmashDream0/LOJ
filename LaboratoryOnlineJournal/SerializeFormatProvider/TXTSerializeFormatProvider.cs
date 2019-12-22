@@ -10,10 +10,10 @@ using System.Threading.Tasks;
 
 namespace LaboratoryOnlineJournal.SerializeFormatProvider
 {
-    public class CSVSerializeFormatProvider : SerializeFormatProvider
+    public class TXTSerializeFormatProvider : SerializeFormatProvider
     {
-        public CSVSerializeFormatProvider(Encoding encoding, DataBase dataBase)
-            : base("CSV", new CSVFormatChecker(encoding), new CSVSerializeProvider(encoding, dataBase), new BlankEncryptionProvider())
+        public TXTSerializeFormatProvider( DataBase dataBase)
+            : base("TXT", new TXTFormatChecker(Encoding.GetEncoding(1251)), new TXTSerializeProvider(Encoding.GetEncoding(1251), dataBase), new BlankEncryptionProvider())
         { }
     }
 }

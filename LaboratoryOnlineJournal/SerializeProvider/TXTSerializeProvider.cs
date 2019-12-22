@@ -9,16 +9,31 @@ using System.Threading.Tasks;
 
 namespace LaboratoryOnlineJournal.SerializeProvider
 {
-    public class CSVSerializeProvider : CSVFormatChecker, ISerializeProvider
+    public class TXTSerializeProvider : TXTFormatChecker, ISerializeProvider
     {
-        public CSVSerializeProvider(Encoding encoding, DataBase dataBase) : base(encoding)
+        static TXTSerializeProvider()
+        {
+            _replaceVariants = new ReplaceVariant[]
+                {
+                    new ReplaceVariant(@"\\", "\\"),
+                    new ReplaceVariant(@"\r", "\r"),
+                    new ReplaceVariant(@"\n", "\n"),
+                    new ReplaceVariant("<¬>", "┐"),
+                    new ReplaceVariant("<¦>", "│"),
+                    //new ReplaceVariant("•", ","),
+                };
+        }
+
+        public TXTSerializeProvider(Encoding encoding, DataBase dataBase) : base(encoding)
         {
             _dataBase = dataBase;
         }
 
         private readonly String _separator = "\t";
         private readonly DataBase _dataBase;
-        public String Name => "CSV";
+        public String Name => "TXT";
+
+        private static readonly IEnumerable<ReplaceVariant> _replaceVariants;
 
         public unsafe byte[] Serialize(IEnumerable<DataBase.ISTable> tables, DateTime date, uint userID)
         {
@@ -94,9 +109,11 @@ namespace LaboratoryOnlineJournal.SerializeProvider
                                         break;
                                     case DataBase.Types.Double:
                                         value = table.Rows.Get_UnShow<double>(i, column.Index);
+                                        value = ReplaceFront(value.ToString());
                                         break;
                                     case DataBase.Types.Decimal:
                                         value = table.Rows.Get_UnShow<decimal>(i, column.Index);
+                                        value = ReplaceFront(value.ToString());
                                         break;
                                     case DataBase.Types.Int64:
                                         value = table.Rows.Get_UnShow<long>(i, column.Index);
@@ -110,7 +127,7 @@ namespace LaboratoryOnlineJournal.SerializeProvider
                                     case DataBase.Types.String:
                                         value = table.Rows.Get_UnShow<string>(i, column.Index);
 
-                                        value = value.ToString().Replace("\\", "\\\\").Replace(Environment.NewLine, "\\r\\n").Replace("\n", "\\n").Replace("\r", "\\r");
+                                        value = ReplaceFront(value.ToString());
                                         break;
                                     default: throw new Exception("не поддерживаемый тип");
                                 }
@@ -245,10 +262,16 @@ namespace LaboratoryOnlineJournal.SerializeProvider
                     result = DateTime.ParseExact(txt, "dd-MM-yyyy HH.mm.ss.fffffff", CultureInfo.InvariantCulture);
                     break;
                 case DataBase.Types.Double:
-                    result = Double.Parse(txt);
+                    {
+                        var str = ReplaceBackward(txt);
+                        result = Double.Parse(str);
+                    }
                     break;
                 case DataBase.Types.Decimal:
-                    result = Decimal.Parse(txt);
+                    {
+                        var str = ReplaceBackward(txt);
+                        result = Decimal.Parse(str);
+                    }
                     break;
                 case DataBase.Types.Int64:
                     result = Int64.Parse(txt);
@@ -260,12 +283,46 @@ namespace LaboratoryOnlineJournal.SerializeProvider
                     result = new RIU32(UInt32.Parse(txt));
                     break;
                 case DataBase.Types.String:
-                    result = txt.ToString().Replace("\\r\\n", Environment.NewLine).Replace("\\n", "\n").Replace("\\r", "\r").Replace("\\\\", "\\");
+                    result = ReplaceBackward(txt);
                     break;
                 default: throw new Exception("не поддерживаемый тип");
             }
 
             return result;
+        }
+
+        private static String ReplaceBackward(String txt)
+        {
+            var sb = new StringBuilder(txt);
+
+            foreach (var replaceValiant in _replaceVariants)
+            { sb.Replace(replaceValiant.From, replaceValiant.To); }
+
+            var result = sb.ToString();
+
+            return result;
+        }
+
+        private static String ReplaceFront(String txt)
+        {
+            var sb = new StringBuilder(txt);
+
+            foreach (var replaceValiant in _replaceVariants)
+            { sb.Replace(replaceValiant.To, replaceValiant.From); }
+
+            return sb.ToString();
+        }
+
+        private class ReplaceVariant
+        {
+            public ReplaceVariant(String from, String to)
+            {
+                From = from;
+                To = to;
+            }
+
+            public String From { get; private set; }
+            public String To { get; private set; }
         }
     }
 }

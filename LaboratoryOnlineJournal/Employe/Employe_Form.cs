@@ -1946,7 +1946,7 @@ namespace LaboratoryOnlineJournal
             {
                 var WorkYM = Employe_Form.WorkYM;
 
-                new DB_Form().ShowDialog();
+                new DB_Form(data.SynchPool).ShowDialog();
 
                 if (WorkYM != Employe_Form.WorkYM)
                 { Employe_Form.WorkYM = WorkYM; }
