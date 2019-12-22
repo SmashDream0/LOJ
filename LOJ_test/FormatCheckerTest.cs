@@ -12,9 +12,9 @@ namespace LOJ_test
     public class FormatCheckerTest
     {
         [TestMethod]
-        public void CSVTest()
+        public void TXTTest()
         {
-            var checker = new CSVFormatChecker(Encoding.UTF32);
+            var checker = new TXTFormatChecker(Encoding.UTF32);
 
             var sb = new StringBuilder();
             sb.AppendLine(checker.Mark);
@@ -28,12 +28,12 @@ namespace LOJ_test
         [TestMethod]
         public void OldTest()
         {
-            var csvChecker = new CSVFormatChecker(Encoding.UTF32);
+            var txtChecker = new TXTFormatChecker(Encoding.UTF32);
 
             var checker = new OldFormatChecker(Encoding.UTF32);
 
             var sb = new StringBuilder();
-            sb.AppendLine(csvChecker.Mark);
+            sb.AppendLine(txtChecker.Mark);
             sb.AppendLine("Just for test");
             var bytes = Encoding.UTF32.GetBytes(sb.ToString());
 

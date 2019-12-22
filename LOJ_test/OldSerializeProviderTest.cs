@@ -170,38 +170,6 @@ namespace LOJ_test
         {
             var tables = GetSTables();
 
-            //var sPool = DataBase.Tables.First(x => x.Name == "SPool");
-
-            //uint sPoolID;
-            //{
-            //    var values = new object[sPool.Columns.Count];
-            //    values[C.SPool.AUser] = (uint)1;
-            //    values[C.SPool.Date] = new DateTime(2019, 12, 14);
-            //    values[C.SPool.Local] = true;
-
-            //    sPoolID = sPool.DataSource.AddRow(405, values).ID;
-            //}
-
-            //foreach (var table in tables)
-            //{
-            //    for (int j = 0; j < table.Rows.Count; j++)
-            //    {
-            //        var id = table.Rows.GetID(j);
-
-            //        table.Parent.Rows.Set(id, table.Parent.Columns.Count - 1, new RIU32(sPoolID));
-            //    }
-            //}
-
-            //var uTable = DataBase.Tables.First(x => x.Name == "UTable");
-
-            //var synchPool = new SynchPool_class(DataBase);
-
-            //synchPool.Invalidate(uTable.CreateSubTable(false));
-
-            //var bytes = synchPool.GetMessage(sPoolID);
-
-            //var str = String.Join(", ", bytes);
-
             var date = new DateTime(2019, 12, 14);
             uint userID = 1;
 

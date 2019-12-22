@@ -58,15 +58,17 @@
     <Reference Include="System.Windows.Forms" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="CSVSerializeProviderTest.cs" />
     <Compile Include="EncodingTest.cs" />
     <Compile Include="FormatCheckerTest.cs" />
+    <Compile Include="KeyContainerTests.cs" />
+    <Compile Include="TXTFormatProviderTest.cs" />
     <Compile Include="OldFormatProviderTest.cs" />
     <Compile Include="OldSerializeProviderTest.cs" />
     <Compile Include="TestData\ClosedKeys.cs" />
     <Compile Include="TestData\TestData1.cs" />
     <Compile Include="OldTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="TXTSerializeProviderTest.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\LaboratoryOnlineJournal\LaboratoryOnlineJournal.csproj">
@@ -174,12 +176,18 @@
     <None Include="TestData\loj\UTable.MFT">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="TestData\TestFiles\выгрузка от 19.06.2017 10-22-16 - D2">
+    <None Include="TestData\OldTestFiles\выгрузка от 19.06.2017 10-22-16 - D2">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="TestData\TestFiles\выгрузка от 31.07.2017 11-49-53 - D2">
+    <None Include="TestData\OldTestFiles\выгрузка от 31.07.2017 11-49-53 - D2">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+  </ItemGroup>
+  <ItemGroup />
+  <ItemGroup>
+    <Content Include="TestData\TXTTestFiles\testData.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
   <Import Project="$(VSToolsPath)\TeamTest\Microsoft.TestTools.targets" Condition="Exists('$(VSToolsPath)\TeamTest\Microsoft.TestTools.targets')" />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

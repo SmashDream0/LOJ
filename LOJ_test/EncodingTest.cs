@@ -26,7 +26,11 @@ namespace LOJ_test
 
             var bytesEncoded = encoder.Encode(bytes, rsa);
 
-            var bytesDecoded = encoder.Decode(bytesEncoded, (id) => rsa);
+            var bytesDecoded = encoder.Decode(bytesEncoded, (uint id, out RSACryptoServiceProvider rsaRes) => 
+            {
+                rsaRes = rsa;
+                return true; 
+            });
 
             CollectionAssert.AreEqual(bytesDecoded, bytesDecoded);
         }

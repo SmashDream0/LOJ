@@ -13,7 +13,7 @@ using System.Threading.Tasks;
 namespace LOJ_test
 {
     [TestClass]
-    public class OldFormatProviderTest
+    public class TXTFormatProviderTest
     {
         private static DataBase DataBase;
 
@@ -81,26 +81,46 @@ namespace LOJ_test
             var result = false;
             rsa = null;
 
-            if (TestData.ClosedKeys.Users.ContainsKey(userID))
+            if (!TestData.ClosedKeys.Users.ContainsKey(userID))
             {
+                rsa = new RSACryptoServiceProvider();
                 var ck = TestData.ClosedKeys.Users[userID];
 
-                rsa = new RSACryptoServiceProvider();
-
                 rsa.FromXmlString(ck);
-
-                result = true;
             }
 
             return result;
         }
 
         [TestMethod]
-        public void OldFormatProviderFilesCheck()
+        public void NewFormatProviderFilesCheck()
+        {
+            var oldSerializerFormatProvider = new TXTSerializeFormatProvider(DataBase);
+
+            var fileInfo = new System.IO.FileInfo("TestData\\TXTTestFiles\\testData.txt");
+
+            var bytes = new Byte[fileInfo.Length];
+
+            using (var stream = fileInfo.OpenRead())
+            { stream.Read(bytes, 0, bytes.Length); }
+
+            DeserializeResult deserializeResult;
+
+            var result = oldSerializerFormatProvider.TryDecodeData(GetRsa, bytes, out deserializeResult);
+
+            Assert.IsTrue(result);
+            Assert.IsNotNull(deserializeResult);
+        }
+
+        /// <summary>
+        /// Проверяю, что новый провайдер формата будет выдавать отрицательный результат, при попытке понять, что файл старого формата ему не подходит
+        /// </summary>
+        [TestMethod]
+        public void TXTFormatProviderFalseFilesCheck()
         {
             var files = System.IO.Directory.GetFiles("TestData\\OldTestFiles");
 
-            var oldSerializerFormatProvider = new OldSerializeFormatProvider(DataBase);
+            var oldSerializerFormatProvider = new TXTSerializeFormatProvider(DataBase);
 
             Assert.IsTrue(files.Any(), "there are no test files");
 
@@ -117,32 +137,9 @@ namespace LOJ_test
 
                 var result = oldSerializerFormatProvider.TryDecodeData(GetRsa, bytes, out deserializeResult);
 
-                Assert.IsTrue(result);
-                Assert.IsNotNull(deserializeResult);
+                Assert.IsFalse(result);
+                Assert.IsNull(deserializeResult);
             }
-        }
-
-        /// <summary>
-        /// Проверяю, что старый провайдер формата будет выдавать отрицательный результат, при попытке понять, что файл нового формата ему не подходит
-        /// </summary>
-        [TestMethod]
-        public void TryReadNewTXTFile()
-        {
-            var oldSerializerFormatProvider = new OldSerializeFormatProvider(DataBase);
-
-            var fileInfo = new System.IO.FileInfo("TestData\\TXTTestFiles\\testData.txt");
-
-            var bytes = new Byte[fileInfo.Length];
-
-            using (var stream = fileInfo.OpenRead())
-            { stream.Read(bytes, 0, bytes.Length); }
-
-            DeserializeResult deserializeResult;
-
-            var result = oldSerializerFormatProvider.TryDecodeData(GetRsa, bytes, out deserializeResult);
-
-            Assert.IsFalse(result);
-            Assert.IsNull(deserializeResult);
         }
     }
 }

@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 namespace LOJ_test
 {
     [TestClass]
-    public class CSVSerializeProviderTest
+    public class TXTSerializeProviderTest
     {
         private static DataBase DataBase;
 
@@ -20,7 +20,7 @@ namespace LOJ_test
         {
             Misc.CheckTablesExist = false;
 
-            DataBase = new DataBase("loj", Encoding.GetEncoding(866));
+            DataBase = new DataBase("TestData\\loj", Encoding.GetEncoding(866));
 
             DataBase.UseMFT(".");
 
@@ -146,7 +146,7 @@ namespace LOJ_test
         [TestMethod]
         public void SerializerTest()
         {
-            var csvSerializerProvider = new CSVSerializeProvider(Encoding.UTF32, DataBase);
+            var csvSerializerProvider = new TXTSerializeProvider(Encoding.GetEncoding(1251), DataBase);
 
             var tables = GetSTables();
 
