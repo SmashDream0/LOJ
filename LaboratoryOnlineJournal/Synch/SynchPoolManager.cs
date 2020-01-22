@@ -168,6 +168,41 @@ namespace LaboratoryOnlineJournal.Synch
             return message;
         }
 
+        /// <summary>
+        /// Получить заголовок пакета данных
+        /// </summary>
+        /// <param name="data">Входящие данные</param>
+        /// <param name="userID">Ключ пользователя</param>
+        /// <param name="synchDate">Дата синхронизации</param>
+        /// <returns></returns>
+        public bool TryGetHeaderData(byte[] data, out uint userID, out DateTime synchDate)
+        {
+            var serializerProvider = GetSerializeProvider();
+
+            DeserializeResult output = null;
+
+            foreach (var formatFrovider in _formatProviders)
+            {
+                if (formatFrovider.TryDecodeData(GetRSA, data, out output))
+                { break; }
+            }
+
+            var result = output != null;
+
+            if (result)
+            {
+                userID = output.UserID;
+                synchDate = output.SynchDate;
+            }
+            else
+            {
+                userID = default(uint);
+                synchDate = default(DateTime);
+            }
+
+            return result;
+        }
+
         /// <summary>Получить шифрованное сообщение</summary>
         /// <returns></returns>
         public unsafe byte[] GetEncrypted()

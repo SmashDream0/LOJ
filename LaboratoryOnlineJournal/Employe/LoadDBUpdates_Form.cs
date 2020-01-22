@@ -35,12 +35,12 @@ namespace LaboratoryOnlineJournal
                     using (var fs = new FileStream(FilePath, FileMode.Open))
                     {
                         uint ID = 0;
+                        DateTime synchData;
 
-                        fs.Position = fs.Length - 4;
-                        *(byte*)&ID = (byte)fs.ReadByte();
-                        *((byte*)&ID + 1) = (byte)fs.ReadByte();
-                        *((byte*)&ID + 2) = (byte)fs.ReadByte();
-                        *((byte*)&ID + 3) = (byte)fs.ReadByte();
+                        var bytes = new byte[fs.Length];
+                        fs.Read(bytes, 0, bytes.Length);
+
+                        data.SynchPool.TryGetHeaderData(bytes, out ID, out synchData);
 
                         if ((bool)G.User.QUERRY().EXIST.WHERE.ID(ID).DO()[0].Value)
                         {

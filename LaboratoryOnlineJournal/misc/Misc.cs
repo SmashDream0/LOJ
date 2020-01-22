@@ -416,7 +416,7 @@ namespace LaboratoryOnlineJournal
                         var Key = G.User.Rows.Get<string>(i, C.User.ck1);
 
                         if (Key.Length > 0)
-                        { data.SynchPool.KeysContainer.Add(UID, T.User.Rows.Get<string>(UID, C.User.ck1), T.User.Rows.Get<string>(UID, C.User.ok1)); }
+                        { data.SynchPool.KeysContainer.Add(UID, T.User.Rows.Get<string>(UID, C.User.ok1), T.User.Rows.Get<string>(UID, C.User.ck1)); }
                     }
 
                     return new AdminPanel();
@@ -432,7 +432,7 @@ namespace LaboratoryOnlineJournal
                         var Key = G.User.Rows.Get<string>(i, C.User.ck1);
 
                         if (Key.Length > 0)
-                        { data.SynchPool.KeysContainer.Add(UID, T.User.Rows.Get<string>(UID, C.User.ck1), T.User.Rows.Get<string>(UID, C.User.ok1)); }
+                        { data.SynchPool.KeysContainer.Add(UID, T.User.Rows.Get<string>(UID, C.User.ok1), T.User.Rows.Get<string>(UID, C.User.ck1)); }
                     }
 
                     return new Employe_Form();
