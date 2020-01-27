@@ -70,7 +70,7 @@ public static class data
 
     public static Settings PrgSettings;
 
-    public static readonly string EmaleSubjectPart = "LaboratoryOnlineJournal";
+    public static readonly string EmaleSubjectPart = "LOJ";
     public static readonly string EmaleSubject = "Обновление " + EmaleSubjectPart;
     public static readonly string SendEmaleSubject = EmaleSubject.Remove(EmaleSubject.Length - EmaleSubjectPart.Length-1, 1).ToLower();
 
